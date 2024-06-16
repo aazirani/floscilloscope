@@ -100,7 +100,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                 lineBarsData: [
                   LineChartBarData(
                     spots: widget.oscilloscopeAxisChartData.dataPoints,
-                    isCurved: true,
+                    isCurved: false,
                     preventCurveOverShooting: true,
                   ),
                 ],
@@ -120,8 +120,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                         : const FlLine(color: Colors.transparent);
                   },
                 ),
-                minX: -_horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                maxX: _horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                minX: 0,
+                maxX: _horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
                 minY: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                 maxY: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                 clipData: const FlClipData.all(),
