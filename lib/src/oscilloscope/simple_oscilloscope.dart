@@ -16,10 +16,10 @@ class SimpleOscilloscope extends StatefulWidget {
 }
 
 class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
-  final TextEditingController _horizontalAxisValuePerDivisionController = TextEditingController();
-  final TextEditingController _verticalAxisValuePerDivisionController = TextEditingController();
-  double _horizontalAxisValuePerDivision = 1.0;
-  double _verticalAxisValuePerDivision = 1.0;
+  late final TextEditingController _horizontalAxisValuePerDivisionController;
+  late final TextEditingController _verticalAxisValuePerDivisionController;
+  late double _horizontalAxisValuePerDivision;
+  late double _verticalAxisValuePerDivision;
 
   // Define FocusNodes for text fields
   final FocusNode _horizontalAxisFocusNode = FocusNode();
@@ -28,19 +28,16 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   @override
   void initState() {
     super.initState();
-    _horizontalAxisValuePerDivisionController.text =
-        widget.oscilloscopeAxisChartData.defaultHorizontalAxisValuePerDivision.toString();
-    _verticalAxisValuePerDivisionController.text =
-        widget.oscilloscopeAxisChartData.defaultVerticalAxisValuePerDivision.toString();
     _horizontalAxisValuePerDivision = widget.oscilloscopeAxisChartData.defaultHorizontalAxisValuePerDivision;
     _verticalAxisValuePerDivision = widget.oscilloscopeAxisChartData.defaultVerticalAxisValuePerDivision;
+    _horizontalAxisValuePerDivisionController = TextEditingController(text: _horizontalAxisValuePerDivision.toString());
+    _verticalAxisValuePerDivisionController = TextEditingController(text: _verticalAxisValuePerDivision.toString());
   }
 
   @override
   void dispose() {
     _horizontalAxisValuePerDivisionController.dispose();
     _verticalAxisValuePerDivisionController.dispose();
-    // Dispose FocusNodes
     _horizontalAxisFocusNode.dispose();
     _verticalAxisFocusNode.dispose();
     super.dispose();
@@ -55,6 +52,39 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     });
   }
 
+  Widget _buildAxisInputField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String label,
+    required String unit,
+  }) {
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus && controller.text.isEmpty) {
+          controller.text = focusNode == _horizontalAxisFocusNode
+              ? _horizontalAxisValuePerDivision.toString()
+              : _verticalAxisValuePerDivision.toString();
+        }
+      },
+      child: TextField(
+        focusNode: focusNode,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: '$label ($unit)',
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+        ],
+        onSubmitted: (value) {
+          _updateValuePerDivisions();
+          focusNode.unfocus();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -67,102 +97,101 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
             flex: 3,
             child: LineChart(
               LineChartData(
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: widget.oscilloscopeAxisChartData.dataPoints,
-                      isCurved: true,
-                      preventCurveOverShooting: true,
-                    ),
-                  ],
-                  gridData: FlGridData(
-                    drawHorizontalLine: true,
-                    drawVerticalLine: true,
-                    horizontalInterval: _verticalAxisValuePerDivision,
-                    verticalInterval: _horizontalAxisValuePerDivision,
-                    getDrawingHorizontalLine: (value) {
-                      return value % _verticalAxisValuePerDivision.abs() < _verticalAxisValuePerDivision // Define a tolerance threshold
-                          ? defaultGridLine(value)
-                          : const FlLine(color: Colors.transparent);
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return value % _horizontalAxisValuePerDivision.abs() < _horizontalAxisValuePerDivision // Define a tolerance threshold
-                          ? defaultGridLine(value)
-                          : const FlLine(color: Colors.transparent);
-                    },
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: widget.oscilloscopeAxisChartData.dataPoints,
+                    isCurved: true,
+                    preventCurveOverShooting: true,
                   ),
-                  minX: -_horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                  maxX: _horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                  minY: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                  maxY: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                  clipData: const FlClipData.all(),
-                  lineTouchData: const LineTouchData(
-                    enabled: false,
-                  ),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
-                      axisNameSize: 18,
-                      sideTitles: SideTitles(
-                        interval: _verticalAxisValuePerDivision,
-                        showTitles: true,
-                        reservedSize: 85,
-                        getTitlesWidget: (value, meta) {
-                          return SideTitleWidget(
-                            axisSide: meta.axisSide,
-                            child: Text(
-                              '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
-                            ),
-                          );
-                        }
-                      )
+                ],
+                gridData: FlGridData(
+                  drawHorizontalLine: true,
+                  drawVerticalLine: true,
+                  horizontalInterval: _verticalAxisValuePerDivision,
+                  verticalInterval: _horizontalAxisValuePerDivision,
+                  getDrawingHorizontalLine: (value) {
+                    return value % _verticalAxisValuePerDivision.abs() < _verticalAxisValuePerDivision
+                        ? defaultGridLine(value)
+                        : const FlLine(color: Colors.transparent);
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return value % _horizontalAxisValuePerDivision.abs() < _horizontalAxisValuePerDivision
+                        ? defaultGridLine(value)
+                        : const FlLine(color: Colors.transparent);
+                  },
+                ),
+                minX: -_horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                maxX: _horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                minY: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                maxY: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                clipData: const FlClipData.all(),
+                lineTouchData: const LineTouchData(
+                  enabled: false,
+                ),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
+                    axisNameSize: 18,
+                    sideTitles: SideTitles(
+                      interval: _verticalAxisValuePerDivision,
+                      showTitles: true,
+                      reservedSize: 85,
+                      getTitlesWidget: (value, meta) {
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: Text(
+                            '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
+                          ),
+                        );
+                      },
                     ),
-                    bottomTitles: AxisTitles(
-                        axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
-                        axisNameSize: 18,
-                        sideTitles: SideTitles(
-                            interval: _horizontalAxisValuePerDivision,
-                            showTitles: true,
-                            reservedSize: 45,
-                            getTitlesWidget: (value, meta) {
-
-                              return SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(meta.formattedValue),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
-                                      ),
-                                    ),
-                                  ],
+                  ),
+                  bottomTitles: AxisTitles(
+                    axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
+                    axisNameSize: 18,
+                    sideTitles: SideTitles(
+                      interval: _horizontalAxisValuePerDivision,
+                      showTitles: true,
+                      reservedSize: 45,
+                      getTitlesWidget: (value, meta) {
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(meta.formattedValue),
                                 ),
-                              );
-                            }
-                        )
+                              ),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: false
-                      )
-                    ),
-                    rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(
-                            showTitles: false
-                        )
-                    )
                   ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
           Expanded(
-            flex: 1, // Adjust flex based on orientation
+            flex: 1,
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -178,54 +207,18 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                         ),
                       ),
                     const SizedBox(height: 20),
-                    Focus(
-                      onFocusChange: (hasFocus) {
-                        if (!hasFocus && _horizontalAxisValuePerDivisionController.text.isEmpty) {
-                          _horizontalAxisValuePerDivisionController.text = _horizontalAxisValuePerDivision.toString();
-                        }
-                      },
-                      child: TextField(
-                        focusNode: _horizontalAxisFocusNode,
-                        controller: _horizontalAxisValuePerDivisionController,
-                        decoration: InputDecoration(
-                          labelText: '${widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel} (${widget.oscilloscopeAxisChartData.horizontalAxisUnit})',
-                          border: const OutlineInputBorder(),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                        ],
-                        onSubmitted: (value) {
-                          _updateValuePerDivisions();
-                          // Remove focus when submitting
-                          _horizontalAxisFocusNode.unfocus();
-                        },
-                      ),
+                    _buildAxisInputField(
+                      controller: _horizontalAxisValuePerDivisionController,
+                      focusNode: _horizontalAxisFocusNode,
+                      label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
+                      unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
                     ),
                     const SizedBox(height: 20),
-                    Focus(
-                      onFocusChange: (hasFocus) {
-                        if (!hasFocus && _verticalAxisValuePerDivisionController.text.isEmpty) {
-                          _verticalAxisValuePerDivisionController.text = _verticalAxisValuePerDivision.toString();
-                        }
-                      },
-                      child: TextField(
-                        focusNode: _verticalAxisFocusNode,
-                        controller: _verticalAxisValuePerDivisionController,
-                        decoration: InputDecoration(
-                          labelText: '${widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel} (${widget.oscilloscopeAxisChartData.verticalAxisUnit})',
-                          border: const OutlineInputBorder(),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                        ],
-                        onSubmitted: (value) {
-                          _updateValuePerDivisions();
-                          // Remove focus when submitting
-                          _verticalAxisFocusNode.unfocus();
-                        },
-                      ),
+                    _buildAxisInputField(
+                      controller: _verticalAxisValuePerDivisionController,
+                      focusNode: _verticalAxisFocusNode,
+                      label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
+                      unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
                     ),
                     const SizedBox(height: 20),
                     if (widget.oscilloscopeAxisChartData.updateButtonLabel.isNotEmpty)
