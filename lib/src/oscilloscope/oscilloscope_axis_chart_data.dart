@@ -9,10 +9,15 @@ class OscilloscopeAxisChartData {
   final String verticalAxisLabel;
   final String horizontalAxisUnit;
   final String verticalAxisUnit;
-  final String updateButtonLabel;
-  final String settingsTitleLabel;
   final double defaultHorizontalAxisValuePerDivision;
   final double defaultVerticalAxisValuePerDivision;
+  final String updateButtonLabel;
+  final String cancelButtonLabel;
+  final String settingsTitleLabel;
+  final String thresholdLabel;
+  final bool isThresholdActive;
+  final Function(double)? onThresholdValueChanged;
+  final Function(double, double)? onValuePerDivisionsChanged;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -26,6 +31,11 @@ class OscilloscopeAxisChartData {
     this.defaultHorizontalAxisValuePerDivision = 1.0,
     this.defaultVerticalAxisValuePerDivision = 1.0,
     this.updateButtonLabel = 'Update',
+    this.cancelButtonLabel = 'Cancel',
     this.settingsTitleLabel = 'Settings',
+    this.thresholdLabel = 'Threshold',
+    this.isThresholdActive = true,
+    this.onThresholdValueChanged,
+    this.onValuePerDivisionsChanged
   });
 }

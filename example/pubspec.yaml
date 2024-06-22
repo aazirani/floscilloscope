@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  syncfusion_flutter_core: ^26.1.38
+  syncfusion_flutter_sliders: ^26.1.35
   fl_chart: ^0.68.0
   flutter:
     sdk: flutter

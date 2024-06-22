@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/floscilloscope.dart';
 import 'package:flutter/material.dart';
@@ -55,9 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SimpleOscilloscope(
                 oscilloscopeAxisChartData: OscilloscopeAxisChartData(
                   dataPoints: [
-                    const FlSpot(1, 1),
-                    const FlSpot(1, 2),
-                    const FlSpot(1, 3),
+                    const FlSpot(5, 10),
+                    const FlSpot(10, 10),
+                    const FlSpot(12, -45),
                   ],
                   numberOfDivisions: 5,
                   horizontalAxisTitlePerDivisionLabel: 'Time/Division',
@@ -68,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   verticalAxisUnit: 'mV',
                   settingsTitleLabel: 'Settings',
                   updateButtonLabel: 'Update',
+                  onThresholdValueChanged: (value) => log(value.toString())
                 ),
               )
             ),
