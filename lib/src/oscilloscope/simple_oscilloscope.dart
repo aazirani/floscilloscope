@@ -24,6 +24,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   late double _verticalAxisValuePerDivision;
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
+  double _sliderBottomPadding = 0.0;
 
   // Define FocusNodes for text fields
   final FocusNode _horizontalAxisFocusNode = FocusNode();
@@ -38,6 +39,10 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     _verticalAxisValuePerDivision = widget.oscilloscopeAxisChartData.defaultVerticalAxisValuePerDivision;
     _horizontalAxisValuePerDivisionController = TextEditingController(text: _horizontalAxisValuePerDivision.toString());
     _verticalAxisValuePerDivisionController = TextEditingController(text: _verticalAxisValuePerDivision.toString());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateBottomPadding();
+    });
   }
 
   @override
@@ -47,6 +52,16 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     _horizontalAxisFocusNode.dispose();
     _verticalAxisFocusNode.dispose();
     super.dispose();
+  }
+
+  void _calculateBottomPadding() {
+    final chartAndLabelAreaRenderBox = _chartAndLabelAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
+    final chartAreaRenderBox = _chartAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
+    if (chartAndLabelAreaRenderBox != null && chartAreaRenderBox != null) {
+      setState(() {
+        _sliderBottomPadding = chartAndLabelAreaRenderBox.size.height - chartAreaRenderBox.size.height;
+      });
+    }
   }
 
   void _updateValuePerDivisions() {
@@ -104,8 +119,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -231,56 +244,49 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                 ),
                 const SizedBox(width: 16),
                 widget.oscilloscopeAxisChartData.isThresholdActive ?
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final chartAndLabelAreaRenderBox = _chartAndLabelAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
-                    final chartAreaRenderBox = _chartAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
-                    final bottomPadding = chartAndLabelAreaRenderBox != null && chartAreaRenderBox != null ? chartAndLabelAreaRenderBox.size.height - chartAreaRenderBox.size.height : 0.0;
-                    return Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 0, bottomPadding),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onDoubleTap: () {
-                                _showThresholdDialog(context);
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onDoubleTap: () {
+                            _showThresholdDialog(context);
+                          },
+                          child: SfSliderTheme(
+                            data: const SfSliderThemeData(
+                              activeTrackHeight: 5,
+                              inactiveTrackHeight: 5,
+                              overlayRadius: 0,
+                              thumbRadius: 0,
+                              labelOffset: Offset(60, 0),
+                            ),
+                            child: SfSlider.vertical(
+                              tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
+                              overlayShape: CustomOverlayShape(overlayRadius: 10),
+                              thumbShape: CustomThumbShape(thumbRadius: 10),
+                              min: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                              max: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                              value: _thresholdProgressbarValue,
+                              showTicks: false,
+                              showLabels: false,
+                              enableTooltip: true,
+                              tooltipPosition: SliderTooltipPosition.left,
+                              activeColor: Theme.of(context).primaryColor,
+                              inactiveColor: Theme.of(context).primaryColor,
+                              minorTicksPerInterval: 1,
+                              onChanged: (dynamic value) {
+                                setState(() {
+                                  _updateThresholdValue(value);
+                                });
                               },
-                              child: SfSliderTheme(
-                                data: const SfSliderThemeData(
-                                  activeTrackHeight: 5,
-                                  inactiveTrackHeight: 5,
-                                  overlayRadius: 0,
-                                  thumbRadius: 0,
-                                  labelOffset: Offset(60, 0),
-                                ),
-                                child: SfSlider.vertical(
-                                  tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
-                                    overlayShape: CustomOverlayShape(overlayRadius: 10),
-                                    thumbShape: CustomThumbShape(thumbRadius: 10),
-                                    min: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                                    max: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                                    value: _thresholdProgressbarValue,
-                                    showTicks: false,
-                                    showLabels: false,
-                                    enableTooltip: true,
-                                    tooltipPosition: SliderTooltipPosition.left,
-                                    activeColor: Theme.of(context).primaryColor,
-                                    inactiveColor: Theme.of(context).primaryColor,
-                                    minorTicksPerInterval: 1,
-                                    onChanged: (dynamic value) {
-                                      setState(() {
-                                        _updateThresholdValue(value);
-                                      });
-                                    },
-                                    onChangeEnd: (dynamic value) =>  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(value.toStringAsFixed(2))),
-                                ),
-                              ),
+                              onChangeEnd: (dynamic value) =>  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(value.toStringAsFixed(2))),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ) : Container(),
               ],
             ),
@@ -434,3 +440,4 @@ class CustomOverlayShape extends SfOverlayShape {
     context.canvas.drawCircle(center, overlayRadius, paint);
   }
 }
+
