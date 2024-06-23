@@ -220,7 +220,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                         horizontalLines: [
                           HorizontalLine(
                             y: _thresholdProgressbarValue,
-                            color: Theme.of(context).dividerColor,
+                            color: Theme.of(context).primaryColor,
                             strokeWidth: 2,
                             dashArray: [5, 5],
                           ),
