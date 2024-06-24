@@ -146,6 +146,17 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                           spots: widget.oscilloscopeAxisChartData.dataPoints,
                           isCurved: false,
                           preventCurveOverShooting: true,
+                          dotData: FlDotData(
+                            show: true,
+                            checkToShowDot: (spot, barData) {
+                              return true;
+                            },
+                            getDotPainter: (spot, percent, bar, index) {
+                              return FlDotCirclePainter(
+                                  radius: widget.oscilloscopeAxisChartData.pointRadius
+                              );
+                            },
+                          ),
                         ),
                       ],
                       gridData: FlGridData(

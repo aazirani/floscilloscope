@@ -18,6 +18,7 @@ class OscilloscopeAxisChartData {
   final bool isThresholdActive;
   final Function(double)? onThresholdValueChanged;
   final Function(double, double)? onValuePerDivisionsChanged;
+  final double pointRadius;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -36,6 +37,7 @@ class OscilloscopeAxisChartData {
     this.thresholdLabel = 'Threshold',
     this.isThresholdActive = true,
     this.onThresholdValueChanged,
-    this.onValuePerDivisionsChanged
+    this.onValuePerDivisionsChanged,
+    this.pointRadius = 1.0
   });
 }
