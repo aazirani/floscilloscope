@@ -371,6 +371,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
             onFieldSubmitted: (value) {
               setState(() {
                 _updateThresholdValue(newValue);
+                widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
               });
               Navigator.of(context).pop();
             },
