@@ -141,24 +141,21 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     chartRendererKey: _chartAreaRenderKey,
                     LineChartData(
                       lineTouchData: const LineTouchData(enabled: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: widget.oscilloscopeAxisChartData.dataPoints,
-                          isCurved: false,
-                          preventCurveOverShooting: true,
-                          dotData: FlDotData(
-                            show: true,
-                            checkToShowDot: (spot, barData) {
-                              return true;
-                            },
-                            getDotPainter: (spot, percent, bar, index) {
-                              return FlDotCirclePainter(
-                                  radius: widget.oscilloscopeAxisChartData.pointRadius
-                              );
-                            },
+                      lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
+                          LineChartBarData(
+                            spots: entry.value,
+                            isCurved: false,
+                            preventCurveOverShooting: true,
+                            color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+                                radius: widget.oscilloscopeAxisChartData.pointRadius,
+                                color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                      ).toList(),
                       gridData: FlGridData(
                         drawHorizontalLine: true,
                         drawVerticalLine: true,

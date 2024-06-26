@@ -57,9 +57,21 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SimpleOscilloscope(
                 oscilloscopeAxisChartData: OscilloscopeAxisChartData(
                   dataPoints: [
-                    const FlSpot(5, 10),
-                    const FlSpot(10, 10),
-                    const FlSpot(12, -45),
+                    [
+                      const FlSpot(5, 10),
+                      const FlSpot(10, 10),
+                      const FlSpot(12, -45),
+                    ],
+                    [
+                      const FlSpot(1, 4),
+                      const FlSpot(75, 23),
+                      const FlSpot(19, -20),
+                    ],
+                    [
+                      const FlSpot(56, 2),
+                      const FlSpot(98, 101),
+                      const FlSpot(109, 150),
+                    ]
                   ],
                   numberOfDivisions: 5,
                   horizontalAxisTitlePerDivisionLabel: 'Time/Division',

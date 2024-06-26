@@ -1,7 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 
 class OscilloscopeAxisChartData {
-  final List<FlSpot> dataPoints;
+  final List<List<FlSpot>> dataPoints;
   final int numberOfDivisions;
   final String horizontalAxisTitlePerDivisionLabel;
   final String verticalAxisTitlePerDivisionLabel;
@@ -19,6 +20,7 @@ class OscilloscopeAxisChartData {
   final Function(double)? onThresholdValueChanged;
   final Function(double, double)? onValuePerDivisionsChanged;
   final double pointRadius;
+  final List<Color> colors;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -38,6 +40,7 @@ class OscilloscopeAxisChartData {
     this.isThresholdActive = true,
     this.onThresholdValueChanged,
     this.onValuePerDivisionsChanged,
-    this.pointRadius = 1.0
+    this.pointRadius = 1.0,
+    this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
   });
 }
