@@ -131,7 +131,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            flex: isPortrait ? 3 : 4,
+            flex: isPortrait ? 2 : 4,
             child: Row(
               children: [
                 Expanded(
@@ -141,13 +141,21 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     chartRendererKey: _chartAreaRenderKey,
                     LineChartData(
                       lineTouchData: const LineTouchData(enabled: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: widget.oscilloscopeAxisChartData.dataPoints,
-                          isCurved: false,
-                          preventCurveOverShooting: true,
-                        ),
-                      ],
+                      lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
+                          LineChartBarData(
+                            spots: entry.value,
+                            isCurved: false,
+                            preventCurveOverShooting: true,
+                            color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+                                radius: widget.oscilloscopeAxisChartData.pointRadius,
+                                color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                              ),
+                            ),
+                          ),
+                      ).toList(),
                       gridData: FlGridData(
                         drawHorizontalLine: true,
                         drawVerticalLine: true,
@@ -228,7 +236,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                           ),
                         ),
                       ),
-                      extraLinesData: widget.oscilloscopeAxisChartData.isThresholdActive ?
+                      extraLinesData: widget.oscilloscopeAxisChartData.isThresholdVisible ?
                       ExtraLinesData(
                         horizontalLines: [
                           HorizontalLine(
@@ -243,7 +251,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                widget.oscilloscopeAxisChartData.isThresholdActive ?
+                widget.oscilloscopeAxisChartData.isThresholdVisible ?
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
                   child: Column(
@@ -254,12 +262,14 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             _showThresholdDialog(context);
                           },
                           child: SfSliderTheme(
-                            data: const SfSliderThemeData(
+                            data: SfSliderThemeData(
                               activeTrackHeight: 5,
                               inactiveTrackHeight: 5,
                               overlayRadius: 0,
                               thumbRadius: 0,
-                              labelOffset: Offset(60, 0),
+                              labelOffset: const Offset(60, 0),
+                              disabledActiveTrackColor: Theme.of(context).disabledColor,
+                              disabledInactiveTrackColor: Theme.of(context).disabledColor,
                             ),
                             child: SfSlider.vertical(
                               tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
@@ -275,7 +285,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               activeColor: Theme.of(context).primaryColor,
                               inactiveColor: Theme.of(context).primaryColor,
                               minorTicksPerInterval: 1,
-                              onChanged: (dynamic value) {
+                              onChanged: !widget.oscilloscopeAxisChartData.isThresholdSliderActive ? null : (dynamic value) {
                                 setState(() {
                                   _updateThresholdValue(value);
                                 });
@@ -293,7 +303,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
           ),
           if (isPortrait) const SizedBox(height: 16),
           Expanded(
-            flex: isPortrait ? 1 : 2,
+            flex: 1,
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -360,6 +370,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
             onFieldSubmitted: (value) {
               setState(() {
                 _updateThresholdValue(newValue);
+                widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
               });
               Navigator.of(context).pop();
             },
