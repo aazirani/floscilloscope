@@ -236,7 +236,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                           ),
                         ),
                       ),
-                      extraLinesData: widget.oscilloscopeAxisChartData.isThresholdActive ?
+                      extraLinesData: widget.oscilloscopeAxisChartData.isThresholdVisible ?
                       ExtraLinesData(
                         horizontalLines: [
                           HorizontalLine(
@@ -251,7 +251,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                widget.oscilloscopeAxisChartData.isThresholdActive ?
+                widget.oscilloscopeAxisChartData.isThresholdVisible ?
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
                   child: Column(
@@ -262,12 +262,14 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             _showThresholdDialog(context);
                           },
                           child: SfSliderTheme(
-                            data: const SfSliderThemeData(
+                            data: SfSliderThemeData(
                               activeTrackHeight: 5,
                               inactiveTrackHeight: 5,
                               overlayRadius: 0,
                               thumbRadius: 0,
-                              labelOffset: Offset(60, 0),
+                              labelOffset: const Offset(60, 0),
+                              disabledActiveTrackColor: Theme.of(context).disabledColor,
+                              disabledInactiveTrackColor: Theme.of(context).disabledColor,
                             ),
                             child: SfSlider.vertical(
                               tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
@@ -283,7 +285,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               activeColor: Theme.of(context).primaryColor,
                               inactiveColor: Theme.of(context).primaryColor,
                               minorTicksPerInterval: 1,
-                              onChanged: (dynamic value) {
+                              onChanged: !widget.oscilloscopeAxisChartData.isThresholdSliderActive ? null : (dynamic value) {
                                 setState(() {
                                   _updateThresholdValue(value);
                                 });
