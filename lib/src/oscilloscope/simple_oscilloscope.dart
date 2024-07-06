@@ -141,7 +141,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     chartRendererKey: _chartAreaRenderKey,
                     LineChartData(
                       lineTouchData: const LineTouchData(enabled: false),
-                      lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
+                      lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.isNotEmpty ? widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
                           LineChartBarData(
                             spots: entry.value,
                             isCurved: false,
@@ -155,7 +155,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               ),
                             ),
                           ),
-                      ).toList(),
+                      ).toList() : [LineChartBarData()],
                       gridData: FlGridData(
                         drawHorizontalLine: true,
                         drawVerticalLine: true,
