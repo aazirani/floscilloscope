@@ -9,9 +9,9 @@ class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
   const SimpleOscilloscope({
-    super.key,
+    Key? key,
     required this.oscilloscopeAxisChartData,
-  });
+  }) : super(key: key);
 
   @override
   State<SimpleOscilloscope> createState() => _SimpleOscilloscopeState();
@@ -26,11 +26,10 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  // Define FocusNodes for text fields
   final FocusNode _horizontalAxisFocusNode = FocusNode();
   final FocusNode _verticalAxisFocusNode = FocusNode();
-  final GlobalKey _chartAndLabelAreaRenderKey = GlobalKey();
-  final GlobalKey _chartAreaRenderKey = GlobalKey();
+  final GlobalKey<_SimpleOscilloscopeState> _chartAndLabelAreaRenderKey = GlobalKey<_SimpleOscilloscopeState>();
+  final GlobalKey<_SimpleOscilloscopeState> _chartAreaRenderKey = GlobalKey<_SimpleOscilloscopeState>();
 
   @override
   void initState() {
@@ -40,7 +39,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     _horizontalAxisValuePerDivisionController = TextEditingController(text: _horizontalAxisValuePerDivision.toString());
     _verticalAxisValuePerDivisionController = TextEditingController(text: _verticalAxisValuePerDivision.toString());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       _calculateBottomPadding();
     });
   }
@@ -137,6 +136,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                 Expanded(
                   flex: 3,
                   child: LineChart(
+                    duration: Duration.zero,
+                    curve: Curves.linear,
                     key: _chartAndLabelAreaRenderKey,
                     chartRendererKey: _chartAreaRenderKey,
                     LineChartData(
@@ -150,8 +151,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             dotData: FlDotData(
                               show: true,
                               getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
-                                radius: widget.oscilloscopeAxisChartData.pointRadius,
-                                color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                                  radius: widget.oscilloscopeAxisChartData.pointRadius,
+                                  color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
                               ),
                             ),
                           ),
@@ -273,8 +274,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             ),
                             child: SfSlider.vertical(
                               tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
-                              overlayShape: CustomOverlayShape(overlayRadius: 10),
-                              thumbShape: CustomThumbShape(thumbRadius: 10),
+                              overlayShape: const CustomOverlayShape(overlayRadius: 10),
+                              thumbShape: const CustomThumbShape(thumbRadius: 10),
                               min: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                               max: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                               value: _thresholdProgressbarValue,
@@ -404,13 +405,14 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       strokeWidth: 0.5,
     );
   }
+
 }
 
 // Custom thumb shape
 class CustomThumbShape extends SfThumbShape {
   final double thumbRadius;
 
-  CustomThumbShape({required this.thumbRadius});
+  const CustomThumbShape({required this.thumbRadius});
 
   @override
   void paint(PaintingContext context, Offset center,
@@ -434,7 +436,7 @@ class CustomThumbShape extends SfThumbShape {
 class CustomOverlayShape extends SfOverlayShape {
   final double overlayRadius;
 
-  CustomOverlayShape({required this.overlayRadius});
+  const CustomOverlayShape({required this.overlayRadius});
 
   @override
   void paint(PaintingContext context, Offset center,
@@ -450,5 +452,7 @@ class CustomOverlayShape extends SfOverlayShape {
 
     context.canvas.drawCircle(center, overlayRadius, paint);
   }
+
 }
+
 
