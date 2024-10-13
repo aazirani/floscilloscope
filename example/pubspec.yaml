@@ -28,9 +28,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  syncfusion_flutter_core: ^26.1.38
-  syncfusion_flutter_sliders: ^26.1.35
-  fl_chart: ^0.68.0
+  syncfusion_flutter_core: ^27.1.52
+  syncfusion_flutter_sliders: ^27.1.52
+  fl_chart: ^0.69.0
   flutter:
     sdk: flutter
   floscilloscope:
@@ -50,7 +50,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

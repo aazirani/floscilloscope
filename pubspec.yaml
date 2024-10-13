@@ -8,16 +8,16 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  syncfusion_flutter_core: ^26.1.38
-  syncfusion_flutter_sliders: ^26.1.35
-  fl_chart: ^0.68.0
+  syncfusion_flutter_core: ^27.1.52
+  syncfusion_flutter_sliders: ^27.1.52
+  fl_chart: ^0.69.0
   flutter:
     sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
