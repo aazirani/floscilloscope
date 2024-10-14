@@ -36,6 +36,67 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
+      dataPoints: [
+        [
+          const FlSpot(5, 10),
+          const FlSpot(10, 10),
+          const FlSpot(12, -45),
+        ],
+        [
+          const FlSpot(1, 4),
+          const FlSpot(75, 23),
+          const FlSpot(19, -20),
+        ],
+        [
+          const FlSpot(56, 2),
+          const FlSpot(98, 101),
+          const FlSpot(109, 150),
+        ]
+      ],
+      numberOfDivisions: 5,
+      horizontalAxisTitlePerDivisionLabel: 'Time/Division',
+      horizontalAxisLabel: 'Time',
+      horizontalAxisUnit: 'µs',
+      verticalAxisTitlePerDivisionLabel: 'Voltage/Division',
+      verticalAxisLabel: 'Voltage',
+      verticalAxisUnit: 'mV',
+      settingsTitleLabel: 'Settings',
+      updateButtonLabel: 'Update',
+      onThresholdValueChanged: (value) => log(value.toString()),
+      settings: [DynamicSetting(
+        label: 'Vertical Axis',
+        unit: 'V',
+        value: 5.0,
+        onSave: (newValue) {
+          print('Vertical Axis Updated: $newValue');
+        },
+        widgetBuilder: (context, controller, focusNode, onSubmitted) {
+          // A dropdown instead of a text field
+          return DropdownButtonFormField<double>(
+            value: double.tryParse(controller.text),
+            decoration: const InputDecoration(
+              labelText: 'Vertical Axis (V)',
+              border: OutlineInputBorder(),
+            ),
+            items: [1.0, 2.5, 5.0, 10.0].map((value) {
+              return DropdownMenuItem<double>(
+                value: value,
+                child: Text(value.toString()),
+              );
+            }).toList(),
+            onChanged: (newValue) {
+              if (newValue != null) {
+                controller.text = newValue.toString();
+
+              }
+            },
+          );
+        },
+      ),
+      ]
+  );
+
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -55,66 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Expanded(
                 child: SimpleOscilloscope(
-                  oscilloscopeAxisChartData: OscilloscopeAxisChartData(
-                      dataPoints: [
-                        [
-                          const FlSpot(5, 10),
-                          const FlSpot(10, 10),
-                          const FlSpot(12, -45),
-                        ],
-                        [
-                          const FlSpot(1, 4),
-                          const FlSpot(75, 23),
-                          const FlSpot(19, -20),
-                        ],
-                        [
-                          const FlSpot(56, 2),
-                          const FlSpot(98, 101),
-                          const FlSpot(109, 150),
-                        ]
-                      ],
-                      numberOfDivisions: 5,
-                      horizontalAxisTitlePerDivisionLabel: 'Time/Division',
-                      horizontalAxisLabel: 'Time',
-                      horizontalAxisUnit: 'µs',
-                      verticalAxisTitlePerDivisionLabel: 'Voltage/Division',
-                      verticalAxisLabel: 'Voltage',
-                      verticalAxisUnit: 'mV',
-                      settingsTitleLabel: 'Settings',
-                      updateButtonLabel: 'Update',
-                      onThresholdValueChanged: (value) => log(value.toString()),
-                      settings: [DynamicSetting(
-                        label: 'Vertical Axis',
-                        unit: 'V',
-                        value: 5.0,
-                        onSave: (newValue) {
-                          print('Vertical Axis Updated: $newValue');
-                        },
-                        widgetBuilder: (context, controller, focusNode, onSubmitted) {
-                          // A dropdown instead of a text field
-                          return DropdownButtonFormField<double>(
-                            value: double.tryParse(controller.text),
-                            decoration: const InputDecoration(
-                              labelText: 'Vertical Axis (V)',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: [1.0, 2.5, 5.0, 10.0].map((value) {
-                              return DropdownMenuItem<double>(
-                                value: value,
-                                child: Text(value.toString()),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              if (newValue != null) {
-                                controller.text = newValue.toString();
-
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      ]
-                  ),
+                  oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
+                  onSettingsChanged: _handleSettingsChanged,
                 )
             ),
           ],
@@ -127,4 +130,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  void _handleSettingsChanged(OscilloscopeAxisChartData newData) {
+    setState(() {
+      _oscilloscopeAxisChartData = newData;
+    });
+  }
+
 }
