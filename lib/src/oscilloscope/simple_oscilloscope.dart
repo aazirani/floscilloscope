@@ -11,9 +11,9 @@ class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
   const SimpleOscilloscope({
-    Key? key,
+    super.key,
     required this.oscilloscopeAxisChartData,
-  }) : super(key: key);
+  });
 
   @override
   State<SimpleOscilloscope> createState() => _SimpleOscilloscopeState();
@@ -321,38 +321,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     });
                   },
                 ),
-                /*
-                Sample dropdown
-                DynamicSetting(
-                  label: 'Vertical Axis',
-                  unit: 'V',
-                  value: 5.0,
-                  onSave: (newValue) {
-                    print('Vertical Axis Updated: $newValue');
-                  },
-                  widgetBuilder: (context, controller, focusNode, onSubmitted) {
-                    // A dropdown instead of a text field
-                    return DropdownButtonFormField<double>(
-                      value: double.tryParse(controller.text),
-                      decoration: InputDecoration(
-                        labelText: 'Vertical Axis (V)',
-                        border: const OutlineInputBorder(),
-                      ),
-                      items: [1.0, 2.5, 5.0, 10.0].map((value) {
-                        return DropdownMenuItem<double>(
-                          value: value,
-                          child: Text(value.toString()),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          controller.text = newValue.toString();
-                        }
-                      },
-                    );
-                  },
-                ),
-                 */
+                ...?widget.oscilloscopeAxisChartData.settings
               ],),
             );
           },
