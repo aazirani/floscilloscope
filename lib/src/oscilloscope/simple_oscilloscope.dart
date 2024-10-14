@@ -78,119 +78,121 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               children: [
                 Flexible(
                   flex: 3,
-                  child: LineChart(
-                    duration: Duration.zero,
-                    curve: Curves.linear,
-                    key: _chartAndLabelAreaRenderKey,
-                    chartRendererKey: _chartAreaRenderKey,
-                    LineChartData(
-                      lineTouchData: const LineTouchData(enabled: false),
-                      lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.isNotEmpty ? widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
-                          LineChartBarData(
-                            spots: entry.value,
-                            isCurved: false,
-                            preventCurveOverShooting: true,
-                            color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
-                            dotData: FlDotData(
-                              show: true,
-                              getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
-                                  radius: widget.oscilloscopeAxisChartData.pointRadius,
-                                  color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                  child: RepaintBoundary(
+                    child: LineChart(
+                      duration: Duration.zero,
+                      curve: Curves.linear,
+                      key: _chartAndLabelAreaRenderKey,
+                      chartRendererKey: _chartAreaRenderKey,
+                      LineChartData(
+                        lineTouchData: const LineTouchData(enabled: false),
+                        lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.isNotEmpty ? widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
+                            LineChartBarData(
+                              spots: entry.value,
+                              isCurved: false,
+                              preventCurveOverShooting: true,
+                              color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+                                    radius: widget.oscilloscopeAxisChartData.pointRadius,
+                                    color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                                ),
                               ),
                             ),
-                          ),
-                      ).toList() : [LineChartBarData()],
-                      gridData: FlGridData(
-                        drawHorizontalLine: true,
-                        drawVerticalLine: true,
-                        horizontalInterval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
-                        verticalInterval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                        getDrawingHorizontalLine: (value) {
-                          return value % widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
-                              ? defaultGridLine(value)
-                              : const FlLine(color: Colors.transparent);
-                        },
-                        getDrawingVerticalLine: (value) {
-                          return value % widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision
-                              ? defaultGridLine(value)
-                              : const FlLine(color: Colors.transparent);
-                        },
-                      ),
-                      minX: 0,
-                      maxX: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
-                      minY: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                      maxY: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                      clipData: const FlClipData.all(),
-                      titlesData: FlTitlesData(
-                        leftTitles: AxisTitles(
-                          axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
-                          axisNameSize: 18,
-                          sideTitles: SideTitles(
-                            interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
-                            showTitles: true,
-                            reservedSize: 85,
-                            getTitlesWidget: (value, meta) {
-                              return SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Text(
-                                  '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
-                                ),
-                              );
-                            },
-                          ),
+                        ).toList() : [LineChartBarData()],
+                        gridData: FlGridData(
+                          drawHorizontalLine: true,
+                          drawVerticalLine: true,
+                          horizontalInterval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                          verticalInterval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                          getDrawingHorizontalLine: (value) {
+                            return value % widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
+                                ? defaultGridLine(value)
+                                : const FlLine(color: Colors.transparent);
+                          },
+                          getDrawingVerticalLine: (value) {
+                            return value % widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision
+                                ? defaultGridLine(value)
+                                : const FlLine(color: Colors.transparent);
+                          },
                         ),
-                        bottomTitles: AxisTitles(
-                          axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
-                          axisNameSize: 18,
-                          sideTitles: SideTitles(
-                            interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                            showTitles: true,
-                            reservedSize: 45,
-                            getTitlesWidget: (value, meta) {
-                              return SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(meta.formattedValue),
+                        minX: 0,
+                        maxX: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
+                        minY: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        maxY: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        clipData: const FlClipData.all(),
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(
+                            axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
+                            axisNameSize: 18,
+                            sideTitles: SideTitles(
+                              interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                              showTitles: true,
+                              reservedSize: 85,
+                              getTitlesWidget: (value, meta) {
+                                return SideTitleWidget(
+                                  axisSide: meta.axisSide,
+                                  child: Text(
+                                    '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
+                            axisNameSize: 18,
+                            sideTitles: SideTitles(
+                              interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                              showTitles: true,
+                              reservedSize: 45,
+                              getTitlesWidget: (value, meta) {
+                                return SideTitleWidget(
+                                  axisSide: meta.axisSide,
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(meta.formattedValue),
+                                        ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: false,
+                            ),
+                          ),
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: false,
+                            ),
                           ),
                         ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: false,
-                          ),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: false,
-                          ),
-                        ),
+                        extraLinesData: widget.oscilloscopeAxisChartData.isThresholdVisible ?
+                        ExtraLinesData(
+                          horizontalLines: [
+                            HorizontalLine(
+                              y: _thresholdProgressbarValue,
+                              color: Theme.of(context).primaryColor,
+                              strokeWidth: 2,
+                              dashArray: [5, 5],
+                            ),
+                          ],
+                        ) : null,
                       ),
-                      extraLinesData: widget.oscilloscopeAxisChartData.isThresholdVisible ?
-                      ExtraLinesData(
-                        horizontalLines: [
-                          HorizontalLine(
-                            y: _thresholdProgressbarValue,
-                            color: Theme.of(context).primaryColor,
-                            strokeWidth: 2,
-                            dashArray: [5, 5],
-                          ),
-                        ],
-                      ) : null,
                     ),
                   ),
                 ),
