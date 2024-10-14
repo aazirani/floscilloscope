@@ -10,8 +10,8 @@ class OscilloscopeAxisChartData {
   final String verticalAxisLabel;
   final String horizontalAxisUnit;
   final String verticalAxisUnit;
-  final double defaultHorizontalAxisValuePerDivision;
-  final double defaultVerticalAxisValuePerDivision;
+  double horizontalAxisValuePerDivision;
+  double verticalAxisValuePerDivision;
   final String updateButtonLabel;
   final String cancelButtonLabel;
   final String settingsTitleLabel;
@@ -32,8 +32,8 @@ class OscilloscopeAxisChartData {
     required this.verticalAxisLabel,
     required this.horizontalAxisUnit,
     required this.verticalAxisUnit,
-    this.defaultHorizontalAxisValuePerDivision = 1.0,
-    this.defaultVerticalAxisValuePerDivision = 1.0,
+    this.horizontalAxisValuePerDivision = 1.0,
+    this.verticalAxisValuePerDivision = 1.0,
     this.updateButtonLabel = 'Update',
     this.cancelButtonLabel = 'Cancel',
     this.settingsTitleLabel = 'Settings',
