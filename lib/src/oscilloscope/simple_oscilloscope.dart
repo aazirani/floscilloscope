@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/chart_settings.dart';
+import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -300,7 +301,30 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              content: ChartSettings(oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData, onSettingUpdateFunction: _onSettingsUpdate,),
+              content: ChartSettings(dynamicSettings: [
+                DynamicSetting(
+                  label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
+                  unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
+                  value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                  onSave: (newValue) {
+                    this.setState(() {
+                      widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
+                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
+                    });
+                  },
+                ),
+                DynamicSetting(
+                  label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
+                  unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
+                  value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                  onSave: (newValue) {
+                    this.setState(() {
+                      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
+                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
+                    });
+                  },
+                ),
+              ],),
             );
           },
         );
