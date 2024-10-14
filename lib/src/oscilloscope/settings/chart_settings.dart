@@ -1,3 +1,4 @@
+import 'package:floscilloscope/src/oscilloscope/settings/decimal_text_input_formatter.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ class ChartSettings extends StatefulWidget {
 class _ChartSettingsState extends State<ChartSettings> {
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, FocusNode> _focusNodes = {};
+  final Map<int, String?> _validationMessages = {};
 
   @override
   void initState() {
@@ -61,12 +63,24 @@ class _ChartSettingsState extends State<ChartSettings> {
 
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        child: _buildSettingField(
-          controller: _controllers[index]!,
-          focusNode: _focusNodes[index]!,
-          label: setting.label,
-          unit: setting.unit,
-          onSave: setting.onSave,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSettingField(
+              controller: _controllers[index]!,
+              focusNode: _focusNodes[index]!,
+              setting: setting,
+              index: index,
+            ),
+            if (setting.widgetBuilder != null && _validationMessages[index] != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Text(
+                  _validationMessages[index]!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+          ],
         ),
       );
     }).toList();
@@ -75,43 +89,87 @@ class _ChartSettingsState extends State<ChartSettings> {
   Widget _buildSettingField({
     required TextEditingController controller,
     required FocusNode focusNode,
-    required String label,
-    required String unit,
-    required Function(double) onSave,
+    required DynamicSetting setting,
+    required int index,
   }) {
     return Focus(
       onFocusChange: (hasFocus) {
         if (!hasFocus && controller.text.isEmpty) {
           // Reset the value if the field is left empty
-          controller.text = "0.0";
+          controller.text = setting.value.toString();
         }
       },
-      child: TextField(
-        focusNode: focusNode,
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: '$label ($unit)',
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-        ],
-        onSubmitted: (value) {
-          _saveSettings();
-          focusNode.unfocus();
-        },
-      ),
+      child: setting.widgetBuilder != null
+          ? setting.widgetBuilder!(context, controller, focusNode, (value) {
+        _validateAndSave(setting, value, index);
+      })
+          : _buildDefaultTextField(controller, focusNode, setting, index),
     );
   }
 
-  void _saveSettings() {
-    // Iterate through all settings and call their save functions
-    widget.dynamicSettings.asMap().forEach((index, setting) {
-      double updatedValue = double.tryParse(_controllers[index]!.text) ?? setting.value;
-      setting.onSave(updatedValue);
+  Widget _buildDefaultTextField(
+      TextEditingController controller,
+      FocusNode focusNode,
+      DynamicSetting setting,
+      int index,
+      ) {
+    // Define input formatters based on input type and decimal control
+    List<TextInputFormatter> inputFormatters = [];
+    if (setting.inputType == InputType.number) {
+      // If decimalPlaces is null, allow unrestricted decimals
+      inputFormatters.add(DecimalTextInputFormatter(decimalRange: setting.decimalPlaces));
+    }
+
+    return TextField(
+      focusNode: focusNode,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: '${setting.label} (${setting.unit})',
+        border: const OutlineInputBorder(),
+        // Set the errorText to display validation messages natively
+        errorText: _validationMessages[index],
+      ),
+      keyboardType: setting.inputType == InputType.number
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : TextInputType.text,
+      inputFormatters: inputFormatters,
+      onSubmitted: (value) {
+        _saveSettings();
+        focusNode.unfocus();
+      },
+    );
+  }
+
+  void _validateAndSave(DynamicSetting setting, dynamic inputValue, int index) {
+    setState(() {
+      // Perform validation if a custom validator is provided
+      final validationMessage = setting.validator?.call(inputValue);
+      _validationMessages[index] = validationMessage;
+
+      // Stop if validation fails
+      if (validationMessage != null) return;
+
+      // Handle number input or text input based on the setting's input type
+      final valueToSave = setting.inputType == InputType.number
+          ? (double.tryParse(inputValue) ?? setting.value)
+          : inputValue;
+
+      // Update the controller text if it's a number input
+      if (setting.inputType == InputType.number) {
+        _controllers[index]?.text = valueToSave.toString();
+      }
+
+      // Trigger onSave callback with the appropriate value
+      setting.onSave(valueToSave);
     });
-    Navigator.of(context).pop();
+  }
+
+
+  void _saveSettings() {
+    widget.dynamicSettings.asMap().forEach((index, setting) {
+      _validateAndSave(setting, _controllers[index]!.text, index);
+    });
+    if(_validationMessages.values.where((v) => v != null).isEmpty) Navigator.of(context).pop();
   }
 }
 

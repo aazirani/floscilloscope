@@ -51,14 +51,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     }
   }
 
-  // This function will trigger the rebuild of the SimpleOscilloscope widget.
-  void _onSettingsUpdate() {
-    setState(() {
-      _updateThresholdValue();
-    });
-    Navigator.of(context).pop();
-  }
-
   void _updateThresholdValue([double? value]) {
     if (value != null) {
       value = double.parse(value.toStringAsFixed(2));
@@ -301,11 +293,13 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
+              title: Text(widget.oscilloscopeAxisChartData.settingsTitleLabel),
               content: ChartSettings(dynamicSettings: [
                 DynamicSetting(
                   label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
                   unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
                   value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                  decimalPlaces: 2,
                   onSave: (newValue) {
                     this.setState(() {
                       widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
@@ -317,6 +311,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                   label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
                   unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
                   value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                  decimalPlaces: 2,
                   onSave: (newValue) {
                     this.setState(() {
                       widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
@@ -324,6 +319,38 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     });
                   },
                 ),
+                /*
+                Sample dropdown
+                DynamicSetting(
+                  label: 'Vertical Axis',
+                  unit: 'V',
+                  value: 5.0,
+                  onSave: (newValue) {
+                    print('Vertical Axis Updated: $newValue');
+                  },
+                  widgetBuilder: (context, controller, focusNode, onSubmitted) {
+                    // A dropdown instead of a text field
+                    return DropdownButtonFormField<double>(
+                      value: double.tryParse(controller.text),
+                      decoration: InputDecoration(
+                        labelText: 'Vertical Axis (V)',
+                        border: const OutlineInputBorder(),
+                      ),
+                      items: [1.0, 2.5, 5.0, 10.0].map((value) {
+                        return DropdownMenuItem<double>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          controller.text = newValue.toString();
+                        }
+                      },
+                    );
+                  },
+                ),
+                 */
               ],),
             );
           },
