@@ -38,41 +38,43 @@ class _ChartSettingsState extends State<ChartSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.oscilloscopeAxisChartData.settingsTitleLabel.isNotEmpty)
-          Text(
-            widget.oscilloscopeAxisChartData.settingsTitleLabel,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.oscilloscopeAxisChartData.settingsTitleLabel.isNotEmpty)
+            Text(
+              widget.oscilloscopeAxisChartData.settingsTitleLabel,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+          const SizedBox(height: 20),
+          _buildAxisInputField(
+            controller: _horizontalAxisValuePerDivisionController,
+            focusNode: _horizontalAxisFocusNode,
+            label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
+            unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
           ),
-        const SizedBox(height: 20),
-        _buildAxisInputField(
-          controller: _horizontalAxisValuePerDivisionController,
-          focusNode: _horizontalAxisFocusNode,
-          label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
-          unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
-        ),
-        const SizedBox(height: 20),
-        _buildAxisInputField(
-          controller: _verticalAxisValuePerDivisionController,
-          focusNode: _verticalAxisFocusNode,
-          label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
-          unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
-        ),
-        const SizedBox(height: 20),
-        if (widget.oscilloscopeAxisChartData.updateButtonLabel.isNotEmpty)
-          ElevatedButton(
-            onPressed: () => setState(() {
-              _updateValuePerDivisions();
-              widget.onSettingUpdateFunction();
-            }),
-            child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
+          const SizedBox(height: 20),
+          _buildAxisInputField(
+            controller: _verticalAxisValuePerDivisionController,
+            focusNode: _verticalAxisFocusNode,
+            label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
+            unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
           ),
-      ],
+          const SizedBox(height: 20),
+          if (widget.oscilloscopeAxisChartData.updateButtonLabel.isNotEmpty)
+            ElevatedButton(
+              onPressed: () => setState(() {
+                _updateValuePerDivisions();
+                widget.onSettingUpdateFunction();
+              }),
+              child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
+            ),
+        ],
+      ),
     );
   }
 

@@ -55,6 +55,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     setState(() {
       _updateThresholdValue();
     });
+    Navigator.of(context).pop();
   }
 
   void _updateThresholdValue([double? value]) {
@@ -71,19 +72,16 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Flex(
-        direction: isPortrait ? Axis.vertical : Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: isPortrait ? 2 : 4,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _chartHeaderRow(),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded(
+                Flexible(
                   flex: 3,
                   child: LineChart(
                     duration: Duration.zero,
@@ -252,18 +250,61 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               ],
             ),
           ),
-          if (isPortrait) const SizedBox(height: 16),
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ChartSettings(oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData, onSettingUpdateFunction: _onSettingsUpdate)
+        ),
+      ],
+    );
+  }
+
+  Widget _chartHeaderRow([String? title]){
+    return Row(
+      children: [
+        Flexible(
+          fit: FlexFit.tight,
+          child: title != null
+              ? Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
               ),
             ),
-          ),
-        ],
-      ),
+          )
+              : Container(),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: _showSettingsButton(),
+        )
+      ],
+    );
+  }
+
+  Widget _showSettingsButton(){
+    return Row(
+      children: [
+        IconButton(
+            icon: const Icon(Icons.settings),
+            color: Theme.of(context).colorScheme.primary,
+            onPressed: _showSettingsDialog
+        ),
+      ],
+    );
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              content: ChartSettings(oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData, onSettingUpdateFunction: _onSettingsUpdate,),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -369,5 +410,3 @@ class CustomOverlayShape extends SfOverlayShape {
   }
 
 }
-
-
