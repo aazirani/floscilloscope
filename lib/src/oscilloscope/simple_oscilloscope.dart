@@ -278,7 +278,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     return Row(
       children: [
         IconButton(
-            icon: const Icon(Icons.settings),
+            icon: widget.oscilloscopeAxisChartData.settingsIcon,
             color: Theme.of(context).colorScheme.primary,
             onPressed: _showSettingsDialog
         ),
@@ -294,7 +294,9 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
               title: Text(widget.oscilloscopeAxisChartData.settingsTitleLabel),
-              content: ChartSettings(dynamicSettings: [
+              content: ChartSettings(
+                oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData,
+                dynamicSettings: [
                 DynamicSetting(
                   label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
                   unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,

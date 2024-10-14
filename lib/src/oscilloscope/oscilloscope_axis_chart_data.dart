@@ -22,6 +22,7 @@ class OscilloscopeAxisChartData {
   final double pointRadius;
   final List<Color> colors;
   final bool isThresholdSliderActive;
+  final Widget settingsIcon;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -44,5 +45,6 @@ class OscilloscopeAxisChartData {
     this.pointRadius = 1.0,
     this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
     this.isThresholdSliderActive = true,
+    this.settingsIcon = const Icon(Icons.settings)
   });
 }

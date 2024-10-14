@@ -1,13 +1,16 @@
+import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/decimal_text_input_formatter.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ChartSettings extends StatefulWidget {
+  final OscilloscopeAxisChartData oscilloscopeAxisChartData;
   final List<DynamicSetting> dynamicSettings;
 
   const ChartSettings({
     super.key,
+    required this.oscilloscopeAxisChartData,
     required this.dynamicSettings,
   });
 
@@ -49,7 +52,7 @@ class _ChartSettingsState extends State<ChartSettings> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _saveSettings,
-            child: const Text('Save Settings'),
+            child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
           ),
         ],
       ),
