@@ -9,10 +9,12 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
+  final Function(OscilloscopeAxisChartData) onSettingsChanged;
 
   const SimpleOscilloscope({
     super.key,
     required this.oscilloscopeAxisChartData,
+    required this.onSettingsChanged,
   });
 
   @override
@@ -297,32 +299,45 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               content: ChartSettings(
                 oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData,
                 dynamicSettings: [
-                DynamicSetting(
-                  label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
-                  unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
-                  value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                  decimalPlaces: 2,
-                  onSave: (newValue) {
-                    this.setState(() {
-                      widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
-                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
-                    });
-                  },
-                ),
-                DynamicSetting(
-                  label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
-                  unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
-                  value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
-                  decimalPlaces: 2,
-                  onSave: (newValue) {
-                    this.setState(() {
-                      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
-                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
-                    });
-                  },
-                ),
-                ...?widget.oscilloscopeAxisChartData.settings
-              ],),
+                  DynamicSetting(
+                    label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
+                    unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
+                    value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                    decimalPlaces: 2,
+                    onSave: (newValue) {
+                      setState(() {
+                        widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
+                        widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
+                            widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                            widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
+                        );
+
+                        // Notify parent widget about the change
+                        widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
+                      });
+                    },
+                  ),
+                  DynamicSetting(
+                    label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
+                    unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
+                    value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                    decimalPlaces: 2,
+                    onSave: (newValue) {
+                      setState(() {
+                        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
+                        widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
+                            widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                            widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
+                        );
+
+                        // Notify parent widget about the change
+                        widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
+                      });
+                    },
+                  ),
+                  ...?widget.oscilloscopeAxisChartData.settings
+                ],
+              ),
             );
           },
         );
