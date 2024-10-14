@@ -1,5 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
+import 'package:floscilloscope/src/oscilloscope/settings/chart_settings.dart';
+import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -9,47 +11,33 @@ class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
   const SimpleOscilloscope({
-    Key? key,
+    super.key,
     required this.oscilloscopeAxisChartData,
-  }) : super(key: key);
+  });
 
   @override
   State<SimpleOscilloscope> createState() => _SimpleOscilloscopeState();
 }
 
 class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
-  late final TextEditingController _horizontalAxisValuePerDivisionController;
-  late final TextEditingController _verticalAxisValuePerDivisionController;
-  late double _horizontalAxisValuePerDivision;
-  late double _verticalAxisValuePerDivision;
+
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  final FocusNode _horizontalAxisFocusNode = FocusNode();
-  final FocusNode _verticalAxisFocusNode = FocusNode();
   final GlobalKey<_SimpleOscilloscopeState> _chartAndLabelAreaRenderKey = GlobalKey<_SimpleOscilloscopeState>();
   final GlobalKey<_SimpleOscilloscopeState> _chartAreaRenderKey = GlobalKey<_SimpleOscilloscopeState>();
 
   @override
   void initState() {
     super.initState();
-    _horizontalAxisValuePerDivision = widget.oscilloscopeAxisChartData.defaultHorizontalAxisValuePerDivision;
-    _verticalAxisValuePerDivision = widget.oscilloscopeAxisChartData.defaultVerticalAxisValuePerDivision;
-    _horizontalAxisValuePerDivisionController = TextEditingController(text: _horizontalAxisValuePerDivision.toString());
-    _verticalAxisValuePerDivisionController = TextEditingController(text: _verticalAxisValuePerDivision.toString());
-
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateBottomPadding();
     });
   }
 
   @override
   void dispose() {
-    _horizontalAxisValuePerDivisionController.dispose();
-    _verticalAxisValuePerDivisionController.dispose();
-    _horizontalAxisFocusNode.dispose();
-    _verticalAxisFocusNode.dispose();
     super.dispose();
   }
 
@@ -63,14 +51,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     }
   }
 
-  void _updateValuePerDivisions() {
-    _horizontalAxisValuePerDivision = double.tryParse(_horizontalAxisValuePerDivisionController.text) ?? _horizontalAxisValuePerDivision;
-    _verticalAxisValuePerDivision = double.tryParse(_verticalAxisValuePerDivisionController.text) ?? _verticalAxisValuePerDivision;
-    _horizontalAxisValuePerDivisionController.text = _horizontalAxisValuePerDivision.toString();
-    _verticalAxisValuePerDivisionController.text = _verticalAxisValuePerDivision.toString();
-    widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(_horizontalAxisValuePerDivision, _verticalAxisValuePerDivision);
-  }
-
   void _updateThresholdValue([double? value]) {
     if (value != null) {
       value = double.parse(value.toStringAsFixed(2));
@@ -78,62 +58,23 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       _thresholdValue = value;
     }
     _thresholdProgressbarValue = _thresholdProgressbarValue.clamp(
-      -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-      _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-    );
-  }
-
-  Widget _buildAxisInputField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required String label,
-    required String unit,
-  }) {
-    return Focus(
-      onFocusChange: (hasFocus) {
-        if (!hasFocus && controller.text.isEmpty) {
-          controller.text = focusNode == _horizontalAxisFocusNode
-              ? _horizontalAxisValuePerDivision.toString()
-              : _verticalAxisValuePerDivision.toString();
-        }
-      },
-      child: TextField(
-        focusNode: focusNode,
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: '$label ($unit)',
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-        ],
-        onSubmitted: (value) {
-          setState(() {
-            _updateValuePerDivisions();
-            _updateThresholdValue();
-          });
-          focusNode.unfocus();
-        },
-      ),
+      -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Flex(
-        direction: isPortrait ? Axis.vertical : Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: isPortrait ? 2 : 4,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _chartHeaderRow(),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded(
+                Flexible(
                   flex: 3,
                   child: LineChart(
                     duration: Duration.zero,
@@ -160,30 +101,30 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                       gridData: FlGridData(
                         drawHorizontalLine: true,
                         drawVerticalLine: true,
-                        horizontalInterval: _verticalAxisValuePerDivision,
-                        verticalInterval: _horizontalAxisValuePerDivision,
+                        horizontalInterval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                        verticalInterval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                         getDrawingHorizontalLine: (value) {
-                          return value % _verticalAxisValuePerDivision.abs() < _verticalAxisValuePerDivision
+                          return value % widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
                               ? defaultGridLine(value)
                               : const FlLine(color: Colors.transparent);
                         },
                         getDrawingVerticalLine: (value) {
-                          return value % _horizontalAxisValuePerDivision.abs() < _horizontalAxisValuePerDivision
+                          return value % widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision
                               ? defaultGridLine(value)
                               : const FlLine(color: Colors.transparent);
                         },
                       ),
                       minX: 0,
-                      maxX: _horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
-                      minY: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                      maxY: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                      maxX: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
+                      minY: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                      maxY: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                       clipData: const FlClipData.all(),
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
                           axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
                           axisNameSize: 18,
                           sideTitles: SideTitles(
-                            interval: _verticalAxisValuePerDivision,
+                            interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
                             showTitles: true,
                             reservedSize: 85,
                             getTitlesWidget: (value, meta) {
@@ -200,7 +141,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                           axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
                           axisNameSize: 18,
                           sideTitles: SideTitles(
-                            interval: _horizontalAxisValuePerDivision,
+                            interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                             showTitles: true,
                             reservedSize: 45,
                             getTitlesWidget: (value, meta) {
@@ -276,8 +217,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
                               overlayShape: const CustomOverlayShape(overlayRadius: 10),
                               thumbShape: const CustomThumbShape(thumbRadius: 10),
-                              min: -_verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                              max: _verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                              min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                              max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                               value: _thresholdProgressbarValue,
                               showTicks: false,
                               showLabels: false,
@@ -302,53 +243,90 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               ],
             ),
           ),
-          if (isPortrait) const SizedBox(height: 16),
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.oscilloscopeAxisChartData.settingsTitleLabel.isNotEmpty)
-                      Text(
-                        widget.oscilloscopeAxisChartData.settingsTitleLabel,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    const SizedBox(height: 20),
-                    _buildAxisInputField(
-                      controller: _horizontalAxisValuePerDivisionController,
-                      focusNode: _horizontalAxisFocusNode,
-                      label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
-                      unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildAxisInputField(
-                      controller: _verticalAxisValuePerDivisionController,
-                      focusNode: _verticalAxisFocusNode,
-                      label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
-                      unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
-                    ),
-                    const SizedBox(height: 20),
-                    if (widget.oscilloscopeAxisChartData.updateButtonLabel.isNotEmpty)
-                      ElevatedButton(
-                        onPressed: () => setState(() {
-                          _updateValuePerDivisions();
-                          _updateThresholdValue();
-                        }),
-                        child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
-                      ),
-                  ],
-                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _chartHeaderRow([String? title]){
+    return Row(
+      children: [
+        Flexible(
+          fit: FlexFit.tight,
+          child: title != null
+              ? Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
               ),
             ),
-          ),
-        ],
-      ),
+          )
+              : Container(),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: _showSettingsButton(),
+        )
+      ],
+    );
+  }
+
+  Widget _showSettingsButton(){
+    return Row(
+      children: [
+        IconButton(
+            icon: widget.oscilloscopeAxisChartData.settingsIcon,
+            color: Theme.of(context).colorScheme.primary,
+            onPressed: _showSettingsDialog
+        ),
+      ],
+    );
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(widget.oscilloscopeAxisChartData.settingsTitleLabel),
+              content: ChartSettings(
+                oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData,
+                dynamicSettings: [
+                DynamicSetting(
+                  label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
+                  unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
+                  value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                  decimalPlaces: 2,
+                  onSave: (newValue) {
+                    this.setState(() {
+                      widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
+                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
+                    });
+                  },
+                ),
+                DynamicSetting(
+                  label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
+                  unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
+                  value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                  decimalPlaces: 2,
+                  onSave: (newValue) {
+                    this.setState(() {
+                      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
+                      widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision, widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision);
+                    });
+                  },
+                ),
+                ...?widget.oscilloscopeAxisChartData.settings
+              ],),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -454,5 +432,3 @@ class CustomOverlayShape extends SfOverlayShape {
   }
 
 }
-
-
