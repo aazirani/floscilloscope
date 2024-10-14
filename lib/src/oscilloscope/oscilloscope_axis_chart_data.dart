@@ -50,4 +50,48 @@ class OscilloscopeAxisChartData {
     this.settingsIcon = const Icon(Icons.settings),
     this.settings
   });
+
+  OscilloscopeAxisChartData copyWith({
+    List<List<FlSpot>>? dataPoints,
+    int? numberOfDivisions,
+    String? horizontalAxisTitlePerDivisionLabel,
+    String? verticalAxisTitlePerDivisionLabel,
+    String? horizontalAxisLabel,
+    String? verticalAxisLabel,
+    String? horizontalAxisUnit,
+    String? verticalAxisUnit,
+    String? updateButtonLabel,
+    String? cancelButtonLabel,
+    String? settingsTitleLabel,
+    String? thresholdLabel,
+    bool? isThresholdVisible,
+    Function(double)? onThresholdValueChanged,
+    Function(double, double)? onValuePerDivisionsChanged,
+    double? pointRadius,
+    List<Color>? colors,
+    bool? isThresholdSliderActive,
+    Widget? settingsIcon,
+    List<DynamicSetting>? settings,
+  }) {
+    return OscilloscopeAxisChartData(
+      dataPoints: dataPoints ?? this.dataPoints,
+      numberOfDivisions: numberOfDivisions ?? this.numberOfDivisions,
+      horizontalAxisTitlePerDivisionLabel: horizontalAxisTitlePerDivisionLabel ?? this.horizontalAxisTitlePerDivisionLabel,
+      verticalAxisTitlePerDivisionLabel: verticalAxisTitlePerDivisionLabel ?? this.verticalAxisTitlePerDivisionLabel,
+      horizontalAxisLabel: horizontalAxisLabel ?? this.horizontalAxisLabel,
+      verticalAxisLabel: verticalAxisLabel ?? this.verticalAxisLabel,
+      horizontalAxisUnit: horizontalAxisUnit ?? this.horizontalAxisUnit,
+      verticalAxisUnit: verticalAxisUnit ?? this.verticalAxisUnit,
+      updateButtonLabel: updateButtonLabel ?? this.updateButtonLabel,
+      thresholdLabel: thresholdLabel ?? this.thresholdLabel,
+      isThresholdVisible: isThresholdVisible ?? this.isThresholdVisible,
+      onThresholdValueChanged: onThresholdValueChanged ?? this.onThresholdValueChanged,
+      onValuePerDivisionsChanged: onValuePerDivisionsChanged ?? this.onValuePerDivisionsChanged,
+      pointRadius: pointRadius ?? this.pointRadius,
+      colors: colors ?? this.colors,
+      isThresholdSliderActive: isThresholdSliderActive ?? this.isThresholdSliderActive,
+      settingsIcon: settingsIcon ?? this.settingsIcon,
+      settings: settings ?? this.settings,
+    );
+  }
 }
