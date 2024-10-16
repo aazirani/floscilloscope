@@ -5,24 +5,26 @@ enum InputType { text, number }
 
 class DynamicSetting {
   String label;
-  String unit;
+  String? unit;
   dynamic value;
   Function(dynamic) onSave;
-  InputType inputType; // Whether it's a text or number input
-  int? decimalPlaces;  // Number of decimal places allowed for number input
+  InputType inputType;
+  int? decimalPlaces;
   List<TextInputFormatter>? inputFormatters;
   String? Function(String)? validator;
   Widget Function(BuildContext context, TextEditingController controller, FocusNode focusNode, Function(String) onSubmitted)? widgetBuilder;
+  bool allowNegativeNumbers;
 
   DynamicSetting({
     required this.label,
-    required this.unit,
+    this.unit,
     required this.value,
     required this.onSave,
-    this.inputType = InputType.number,  // Default to number input
-    this.decimalPlaces,                 // Optional: control decimal places for number input
+    this.inputType = InputType.number,
+    this.decimalPlaces,
     this.inputFormatters,
     this.validator,
     this.widgetBuilder,
+    this.allowNegativeNumbers = false,
   });
 }

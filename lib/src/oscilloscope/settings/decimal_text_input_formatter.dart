@@ -2,8 +2,9 @@ import 'package:flutter/services.dart';
 
 class DecimalTextInputFormatter extends TextInputFormatter {
   final int? decimalRange;
+  final bool allowNegativeNumbers;
 
-  DecimalTextInputFormatter({this.decimalRange});
+  DecimalTextInputFormatter({this.decimalRange, this.allowNegativeNumbers = true});
 
   @override
   TextEditingValue formatEditUpdate(
@@ -14,23 +15,25 @@ class DecimalTextInputFormatter extends TextInputFormatter {
 
     final newText = newValue.text;
 
-    // Allow only numbers and one decimal point
-    if (newText == '.') {
-      return oldValue;
+    // Build the regular expression based on whether negative numbers are allowed
+    String regexPattern;
+    if (allowNegativeNumbers) {
+      regexPattern = r'^-?\d*\.?'; // Allows negative numbers
+    } else {
+      regexPattern = r'^\d*\.?'; // Only allows positive numbers
     }
 
-    // If decimalRange is not set (null), allow any number of decimals
-    if (decimalRange == null) {
-      final RegExp regex = RegExp(r'^\d*\.?\d*$');
-      if (!regex.hasMatch(newText)) {
-        return oldValue;
-      }
+    // If decimalRange is provided, limit the number of digits after the decimal
+    if (decimalRange != null) {
+      regexPattern += r'\d{0,' + decimalRange.toString() + r'}$';
     } else {
-      // Limit the number of decimal places based on decimalRange
-      final RegExp regex = RegExp(r'^\d*\.?\d{0,' + decimalRange.toString() + r'}$');
-      if (!regex.hasMatch(newText)) {
-        return oldValue;
-      }
+      regexPattern += r'\d*$'; // No limit on decimal places if decimalRange is null
+    }
+
+    final RegExp regex = RegExp(regexPattern);
+
+    if (!regex.hasMatch(newText)) {
+      return oldValue;
     }
 
     return newValue;

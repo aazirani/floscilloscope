@@ -308,13 +308,11 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     decimalPlaces: 2,
                     onSave: (newValue) {
                       setState(() {
-                        widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
+                        if(newValue != 0.0) widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
                         widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
                             widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                             widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
                         );
-
-                        // Notify parent widget about the change
                         widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
                       });
                     },
@@ -326,13 +324,11 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     decimalPlaces: 2,
                     onSave: (newValue) {
                       setState(() {
-                        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
+                        if(newValue != 0.0) widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
                         widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
                             widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                             widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
                         );
-
-                        // Notify parent widget about the change
                         widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
                       });
                     },

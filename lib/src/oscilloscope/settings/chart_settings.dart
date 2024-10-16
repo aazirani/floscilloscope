@@ -119,17 +119,26 @@ class _ChartSettingsState extends State<ChartSettings> {
     // Define input formatters based on input type and decimal control
     List<TextInputFormatter> inputFormatters = [];
     if (setting.inputType == InputType.number) {
-      // If decimalPlaces is null, allow unrestricted decimals
-      inputFormatters.add(DecimalTextInputFormatter(decimalRange: setting.decimalPlaces));
+      // Pass the allowNegativeNumbers property to the DecimalTextInputFormatter
+      inputFormatters.add(
+        DecimalTextInputFormatter(
+          decimalRange: setting.decimalPlaces,
+          allowNegativeNumbers: setting.allowNegativeNumbers,
+        ),
+      );
     }
+
+    // Build the label text, including the unit only if it's not null
+    String labelText = setting.unit != null
+        ? '${setting.label} (${setting.unit})'
+        : setting.label;  // Only show unit if it's not null
 
     return TextField(
       focusNode: focusNode,
       controller: controller,
       decoration: InputDecoration(
-        labelText: '${setting.label} (${setting.unit})',
+        labelText: labelText,
         border: const OutlineInputBorder(),
-        // Set the errorText to display validation messages natively
         errorText: _validationMessages[index],
       ),
       keyboardType: setting.inputType == InputType.number
