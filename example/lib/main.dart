@@ -65,12 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
       updateButtonLabel: 'Update',
       onThresholdValueChanged: (value) => log(value.toString()),
       settings: [DynamicSetting(
-        label: 'Vertical Axis',
-        unit: 'V',
-        value: 5.0,
-        onSave: (newValue) {
-          print('Vertical Axis Updated: $newValue');
-        },
+        order: 0,
         widgetBuilder: (context, controller, focusNode, onSubmitted) {
           // A dropdown instead of a text field
           return DropdownButtonFormField<double>(
@@ -88,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onChanged: (newValue) {
               if (newValue != null) {
                 controller.text = newValue.toString();
-
               }
             },
           );

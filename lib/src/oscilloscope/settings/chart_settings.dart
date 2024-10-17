@@ -48,6 +48,10 @@ class _ChartSettingsState extends State<ChartSettings> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+              widget.oscilloscopeAxisChartData.settingsTitleLabel,
+              style: Theme.of(context).textTheme.titleMedium
+          ),
           ..._buildDynamicSettingFields(),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -60,7 +64,18 @@ class _ChartSettingsState extends State<ChartSettings> {
   }
 
   List<Widget> _buildDynamicSettingFields() {
-    return widget.dynamicSettings.asMap().entries.map((entry) {
+    // Sort the settings based on the `order` field
+    List<MapEntry<int, DynamicSetting>> sortedSettings = widget.dynamicSettings
+        .asMap()
+        .entries
+        .toList()
+      ..sort((a, b) {
+        // Sort by `order`, if orders are the same, retain original order in the list
+        int orderComparison = a.value.order.compareTo(b.value.order);
+        return orderComparison != 0 ? orderComparison : a.key.compareTo(b.key);
+      });
+
+    return sortedSettings.map((entry) {
       int index = entry.key;
       DynamicSetting setting = entry.value;
 
@@ -90,23 +105,30 @@ class _ChartSettingsState extends State<ChartSettings> {
   }
 
   Widget _buildSettingField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
+    TextEditingController? controller,
+    FocusNode? focusNode,
     required DynamicSetting setting,
     required int index,
   }) {
+    // If widgetBuilder is set, use it to build the widget
+    if (setting.widgetBuilder != null) {
+      return setting.widgetBuilder!(
+        context,
+        controller!,
+        focusNode!,
+            (value) => _validateAndSave(setting, value, index),
+      );
+    }
+
+    // If widgetBuilder is null, build the default TextField
     return Focus(
       onFocusChange: (hasFocus) {
-        if (!hasFocus && controller.text.isEmpty) {
+        if (!hasFocus && controller!.text.isEmpty && setting.value != null) {
           // Reset the value if the field is left empty
           controller.text = setting.value.toString();
         }
       },
-      child: setting.widgetBuilder != null
-          ? setting.widgetBuilder!(context, controller, focusNode, (value) {
-        _validateAndSave(setting, value, index);
-      })
-          : _buildDefaultTextField(controller, focusNode, setting, index),
+      child: _buildDefaultTextField(controller!, focusNode!, setting, index),
     );
   }
 
@@ -116,10 +138,14 @@ class _ChartSettingsState extends State<ChartSettings> {
       DynamicSetting setting,
       int index,
       ) {
+    // If label or value is null, we can't build the default field
+    if (setting.label == null || setting.value == null) {
+      return const SizedBox.shrink(); // Return an empty widget if key fields are missing
+    }
+
     // Define input formatters based on input type and decimal control
     List<TextInputFormatter> inputFormatters = [];
     if (setting.inputType == InputType.number) {
-      // Pass the allowNegativeNumbers property to the DecimalTextInputFormatter
       inputFormatters.add(
         DecimalTextInputFormatter(
           decimalRange: setting.decimalPlaces,
@@ -131,7 +157,7 @@ class _ChartSettingsState extends State<ChartSettings> {
     // Build the label text, including the unit only if it's not null
     String labelText = setting.unit != null
         ? '${setting.label} (${setting.unit})'
-        : setting.label;  // Only show unit if it's not null
+        : setting.label!;
 
     return TextField(
       focusNode: focusNode,
@@ -146,8 +172,10 @@ class _ChartSettingsState extends State<ChartSettings> {
           : TextInputType.text,
       inputFormatters: inputFormatters,
       onSubmitted: (value) {
+        if (setting.onSave != null) {
+          _validateAndSave(setting, value, index);
+        }
         _saveSettings();
-        focusNode.unfocus();
       },
     );
   }
@@ -161,6 +189,8 @@ class _ChartSettingsState extends State<ChartSettings> {
       // Stop if validation fails
       if (validationMessage != null) return;
 
+      if (setting.onSave == null) return; // Skip saving if onSave is null
+
       // Handle number input or text input based on the setting's input type
       final valueToSave = setting.inputType == InputType.number
           ? (double.tryParse(inputValue) ?? setting.value)
@@ -172,10 +202,9 @@ class _ChartSettingsState extends State<ChartSettings> {
       }
 
       // Trigger onSave callback with the appropriate value
-      setting.onSave(valueToSave);
+      setting.onSave!(valueToSave);
     });
   }
-
 
   void _saveSettings() {
     widget.dynamicSettings.asMap().forEach((index, setting) {
@@ -184,4 +213,3 @@ class _ChartSettingsState extends State<ChartSettings> {
     if(_validationMessages.values.where((v) => v != null).isEmpty) Navigator.of(context).pop();
   }
 }
-
