@@ -297,7 +297,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text(widget.oscilloscopeAxisChartData.settingsTitleLabel),
               content: ChartSettings(
                 oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData,
                 dynamicSettings: [
@@ -306,6 +305,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
                     value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                     decimalPlaces: 2,
+                    order: 1,
                     onSave: (newValue) {
                       setState(() {
                         if(newValue != 0.0) widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
@@ -322,6 +322,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
                     value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
                     decimalPlaces: 2,
+                    order: 2,
                     onSave: (newValue) {
                       setState(() {
                         if(newValue != 0.0) widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
