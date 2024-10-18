@@ -25,6 +25,7 @@ class OscilloscopeAxisChartData {
   final bool isThresholdSliderActive;
   final Widget settingsIcon;
   final List<DynamicSetting>? settings;
+  final String? chartTitle;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -48,6 +49,7 @@ class OscilloscopeAxisChartData {
     this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
     this.isThresholdSliderActive = true,
     this.settingsIcon = const Icon(Icons.settings),
-    this.settings
+    this.settings,
+    this.chartTitle
   });
 }

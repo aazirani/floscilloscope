@@ -37,6 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
+      chartTitle: "Oscilloscope",
       dataPoints: [
         [
           const FlSpot(5, 10),

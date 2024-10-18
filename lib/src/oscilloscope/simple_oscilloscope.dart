@@ -70,7 +70,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _chartHeaderRow(),
+        _chartHeaderRow(widget.oscilloscopeAxisChartData.chartTitle),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -262,10 +262,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 20,
-              ),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           )
               : Container(),
