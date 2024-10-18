@@ -295,7 +295,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
               content: ChartSettings(
-                oscilloscopeAxisChartData: widget.oscilloscopeAxisChartData,
+                settingsTitleLabel: widget.oscilloscopeAxisChartData.settingsTitleLabel,
+                updateButtonLabel: widget.oscilloscopeAxisChartData.updateButtonLabel,
                 dynamicSettings: [
                   DynamicSetting(
                     label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
