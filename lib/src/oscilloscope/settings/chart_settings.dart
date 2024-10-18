@@ -1,16 +1,17 @@
-import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/decimal_text_input_formatter.dart';
 import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ChartSettings extends StatefulWidget {
-  final OscilloscopeAxisChartData oscilloscopeAxisChartData;
+  final String? settingsTitleLabel;
+  final String? updateButtonLabel;
   final List<DynamicSetting> dynamicSettings;
 
   const ChartSettings({
     super.key,
-    required this.oscilloscopeAxisChartData,
+    this.settingsTitleLabel,
+    this.updateButtonLabel,
     required this.dynamicSettings,
   });
 
@@ -48,16 +49,16 @@ class _ChartSettingsState extends State<ChartSettings> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-              widget.oscilloscopeAxisChartData.settingsTitleLabel,
+          widget.settingsTitleLabel != null ? Text(
+              widget.settingsTitleLabel!,
               style: Theme.of(context).textTheme.titleMedium
-          ),
+          ) : const SizedBox.shrink(),
           ..._buildDynamicSettingFields(),
-          const SizedBox(height: 20),
-          ElevatedButton(
+          widget.updateButtonLabel != null ? const SizedBox(height: 20) : const SizedBox.shrink(),
+          widget.updateButtonLabel != null ? ElevatedButton(
             onPressed: _saveSettings,
-            child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
-          ),
+            child: Text(widget.updateButtonLabel!),
+          ) : const SizedBox.shrink(),
         ],
       ),
     );
