@@ -1,5 +1,4 @@
 import 'package:fl_chart/fl_chart.dart';
-import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 
 class OscilloscopeAxisChartData {
@@ -15,17 +14,12 @@ class OscilloscopeAxisChartData {
   double verticalAxisValuePerDivision;
   final String updateButtonLabel;
   final String cancelButtonLabel;
-  final String settingsTitleLabel;
   final String thresholdLabel;
   final bool isThresholdVisible;
   final Function(double)? onThresholdValueChanged;
-  final Function(double, double)? onValuePerDivisionsChanged;
   final double pointRadius;
   final List<Color> colors;
   final bool isThresholdSliderActive;
-  final Widget settingsIcon;
-  final List<DynamicSetting>? settings;
-  final String? chartTitle;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -40,16 +34,11 @@ class OscilloscopeAxisChartData {
     this.verticalAxisValuePerDivision = 1.0,
     this.updateButtonLabel = 'Update',
     this.cancelButtonLabel = 'Cancel',
-    this.settingsTitleLabel = 'Settings',
     this.thresholdLabel = 'Threshold',
     this.isThresholdVisible = true,
     this.onThresholdValueChanged,
-    this.onValuePerDivisionsChanged,
     this.pointRadius = 1.0,
     this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
-    this.isThresholdSliderActive = true,
-    this.settingsIcon = const Icon(Icons.settings),
-    this.settings,
-    this.chartTitle
+    this.isThresholdSliderActive = true
   });
 }

@@ -1,7 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
-import 'package:floscilloscope/src/oscilloscope/settings/chart_settings.dart';
-import 'package:floscilloscope/src/oscilloscope/settings/dynamic_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -70,7 +68,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _chartHeaderRow(widget.oscilloscopeAxisChartData.chartTitle),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -249,96 +246,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _chartHeaderRow([String? title]){
-    return Row(
-      children: [
-        Flexible(
-          fit: FlexFit.tight,
-          child: title != null
-              ? Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          )
-              : Container(),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: _showSettingsButton(),
-        )
-      ],
-    );
-  }
-
-  Widget _showSettingsButton(){
-    return Row(
-      children: [
-        IconButton(
-            icon: widget.oscilloscopeAxisChartData.settingsIcon,
-            color: Theme.of(context).colorScheme.primary,
-            onPressed: _showSettingsDialog
-        ),
-      ],
-    );
-  }
-
-  void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              content: ChartSettings(
-                settingsTitleLabel: widget.oscilloscopeAxisChartData.settingsTitleLabel,
-                updateButtonLabel: widget.oscilloscopeAxisChartData.updateButtonLabel,
-                dynamicSettings: [
-                  DynamicSetting(
-                    label: widget.oscilloscopeAxisChartData.horizontalAxisTitlePerDivisionLabel,
-                    unit: widget.oscilloscopeAxisChartData.horizontalAxisUnit,
-                    value: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                    decimalPlaces: 2,
-                    order: 1,
-                    onSave: (newValue) {
-                      setState(() {
-                        if(newValue != 0.0) widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision = newValue;
-                        widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
-                            widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                            widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
-                        );
-                        widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
-                      });
-                    },
-                  ),
-                  DynamicSetting(
-                    label: widget.oscilloscopeAxisChartData.verticalAxisTitlePerDivisionLabel,
-                    unit: widget.oscilloscopeAxisChartData.verticalAxisUnit,
-                    value: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
-                    decimalPlaces: 2,
-                    order: 2,
-                    onSave: (newValue) {
-                      setState(() {
-                        if(newValue != 0.0) widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision = newValue;
-                        widget.oscilloscopeAxisChartData.onValuePerDivisionsChanged?.call(
-                            widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
-                            widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
-                        );
-                        widget.onSettingsChanged(widget.oscilloscopeAxisChartData);
-                      });
-                    },
-                  ),
-                  ...?widget.oscilloscopeAxisChartData.settings
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
