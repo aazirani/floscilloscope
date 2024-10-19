@@ -7,12 +7,10 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
-  final Function(OscilloscopeAxisChartData) onSettingsChanged;
 
   const SimpleOscilloscope({
     super.key,
     required this.oscilloscopeAxisChartData,
-    required this.onSettingsChanged,
   });
 
   @override

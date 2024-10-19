@@ -36,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
+  final OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
       dataPoints: [
         [
           const FlSpot(5, 10),
@@ -85,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
                 child: SimpleOscilloscope(
                   oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
-                  onSettingsChanged: _handleSettingsChanged,
                 )
             ),
           ],
@@ -97,12 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  void _handleSettingsChanged(OscilloscopeAxisChartData newData) {
-    setState(() {
-      _oscilloscopeAxisChartData = newData;
-    });
   }
 
 }
