@@ -140,10 +140,12 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               showTitles: true,
                               reservedSize: 85,
                               getTitlesWidget: (value, meta) {
-                                return SideTitleWidget(
-                                  axisSide: meta.axisSide,
-                                  child: Text(
-                                    '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
+                                return RepaintBoundary(
+                                  child: SideTitleWidget(
+                                    axisSide: meta.axisSide,
+                                    child: Text(
+                                      '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
+                                    ),
                                   ),
                                 );
                               },
@@ -157,23 +159,25 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               showTitles: true,
                               reservedSize: 45,
                               getTitlesWidget: (value, meta) {
-                                return SideTitleWidget(
-                                  axisSide: meta.axisSide,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(meta.formattedValue),
+                                return RepaintBoundary(
+                                  child: SideTitleWidget(
+                                    axisSide: meta.axisSide,
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(meta.formattedValue),
+                                          ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                        Expanded(
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
@@ -207,51 +211,53 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                 ),
                 const SizedBox(width: 16),
                 widget.oscilloscopeAxisChartData.isThresholdVisible ?
-                Padding(
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onDoubleTap: () {
-                            _showThresholdDialog(context);
-                          },
-                          child: SfSliderTheme(
-                            data: SfSliderThemeData(
-                              activeTrackHeight: 5,
-                              inactiveTrackHeight: 5,
-                              overlayRadius: 0,
-                              thumbRadius: 0,
-                              labelOffset: const Offset(60, 0),
-                              disabledActiveTrackColor: Theme.of(context).disabledColor,
-                              disabledInactiveTrackColor: Theme.of(context).disabledColor,
-                            ),
-                            child: SfSlider.vertical(
-                              stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
-                              tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
-                              overlayShape: const CustomOverlayShape(overlayRadius: 10),
-                              thumbShape: const CustomThumbShape(thumbRadius: 10),
-                              min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                              max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                              value: _thresholdProgressbarValue,
-                              showTicks: false,
-                              showLabels: false,
-                              enableTooltip: true,
-                              tooltipPosition: SliderTooltipPosition.left,
-                              activeColor: Theme.of(context).primaryColor,
-                              inactiveColor: Theme.of(context).primaryColor,
-                              minorTicksPerInterval: 1,
-                              onChanged: !widget.oscilloscopeAxisChartData.isThresholdSliderActive ? null : (dynamic value) {
-                                setState(() {
-                                  _updateThresholdValue(value);
-                                });
-                              },
-                              onChangeEnd: (dynamic value) =>  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(value.toStringAsFixed(2))),
+                RepaintBoundary(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              _showThresholdDialog(context);
+                            },
+                            child: SfSliderTheme(
+                              data: SfSliderThemeData(
+                                activeTrackHeight: 5,
+                                inactiveTrackHeight: 5,
+                                overlayRadius: 0,
+                                thumbRadius: 0,
+                                labelOffset: const Offset(60, 0),
+                                disabledActiveTrackColor: Theme.of(context).disabledColor,
+                                disabledInactiveTrackColor: Theme.of(context).disabledColor,
+                              ),
+                              child: SfSlider.vertical(
+                                stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
+                                tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
+                                overlayShape: const CustomOverlayShape(overlayRadius: 10),
+                                thumbShape: const CustomThumbShape(thumbRadius: 10),
+                                min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                                max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                                value: _thresholdProgressbarValue,
+                                showTicks: false,
+                                showLabels: false,
+                                enableTooltip: true,
+                                tooltipPosition: SliderTooltipPosition.left,
+                                activeColor: Theme.of(context).primaryColor,
+                                inactiveColor: Theme.of(context).primaryColor,
+                                minorTicksPerInterval: 1,
+                                onChanged: !widget.oscilloscopeAxisChartData.isThresholdSliderActive ? null : (dynamic value) {
+                                  setState(() {
+                                    _updateThresholdValue(value);
+                                  });
+                                },
+                                onChangeEnd: (dynamic value) =>  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(value.toStringAsFixed(2))),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ) : Container(),
               ],
