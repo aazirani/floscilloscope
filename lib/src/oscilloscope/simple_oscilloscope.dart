@@ -40,6 +40,26 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant SimpleOscilloscope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
+        widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions) {
+
+      setState(() {
+        _clampThresholdProgressbarValue();
+      });
+    }
+  }
+
+  void _clampThresholdProgressbarValue() {
+    _thresholdProgressbarValue = _thresholdProgressbarValue.clamp(
+      -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+    );
+  }
+
   void _calculateBottomPadding() {
     final chartAndLabelAreaRenderBox = _chartAndLabelAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
     final chartAreaRenderBox = _chartAreaRenderKey.currentContext?.findRenderObject() as RenderBox?;
@@ -56,10 +76,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       _thresholdProgressbarValue = value;
       _thresholdValue = value;
     }
-    _thresholdProgressbarValue = _thresholdProgressbarValue.clamp(
-      -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-    );
+    _clampThresholdProgressbarValue();
   }
 
   @override
@@ -88,13 +105,9 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               isCurved: false,
                               preventCurveOverShooting: true,
                               color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
-                              dotData: FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
-                                    radius: widget.oscilloscopeAxisChartData.pointRadius,
-                                    color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length]
+                                dotData: const FlDotData(
+                                  show: false,  // Disable dots to improve performance
                                 ),
-                              ),
                             ),
                         ).toList() : [LineChartBarData()],
                         gridData: FlGridData(
