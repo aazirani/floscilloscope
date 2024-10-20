@@ -13,6 +13,7 @@ dependencies:
   fl_chart: ^0.69.0
   flutter:
     sdk: flutter
+  syncfusion_flutter_charts: ^27.1.53
 
 dev_dependencies:
   flutter_test:
