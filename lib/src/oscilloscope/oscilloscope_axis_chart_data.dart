@@ -20,6 +20,8 @@ class OscilloscopeAxisChartData {
   final double pointRadius;
   final List<Color> colors;
   final bool isThresholdSliderActive;
+  final double threshold;
+  final double? thresholdDragStepSize;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -39,6 +41,8 @@ class OscilloscopeAxisChartData {
     this.onThresholdValueChanged,
     this.pointRadius = 1.0,
     this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
-    this.isThresholdSliderActive = true
+    this.isThresholdSliderActive = true,
+    this.threshold = 0.0,
+    this.thresholdDragStepSize
   });
 }
