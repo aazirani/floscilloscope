@@ -36,8 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
-      chartTitle: "Oscilloscope",
+  final OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
       dataPoints: [
         [
           const FlSpot(5, 10),
@@ -62,34 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
       verticalAxisTitlePerDivisionLabel: 'Voltage/Division',
       verticalAxisLabel: 'Voltage',
       verticalAxisUnit: 'mV',
-      settingsTitleLabel: 'Settings',
       updateButtonLabel: 'Update',
       onThresholdValueChanged: (value) => log(value.toString()),
-      settings: [DynamicSetting(
-        order: 0,
-        widgetBuilder: (context, controller, focusNode, onSubmitted) {
-          // A dropdown instead of a text field
-          return DropdownButtonFormField<double>(
-            value: double.tryParse(controller.text),
-            decoration: const InputDecoration(
-              labelText: 'Vertical Axis (V)',
-              border: OutlineInputBorder(),
-            ),
-            items: [1.0, 2.5, 5.0, 10.0].map((value) {
-              return DropdownMenuItem<double>(
-                value: value,
-                child: Text(value.toString()),
-              );
-            }).toList(),
-            onChanged: (newValue) {
-              if (newValue != null) {
-                controller.text = newValue.toString();
-              }
-            },
-          );
-        },
-      ),
-      ]
   );
 
   void _incrementCounter() {
@@ -112,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
                 child: SimpleOscilloscope(
                   oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
-                  onSettingsChanged: _handleSettingsChanged,
                 )
             ),
           ],
@@ -124,12 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  void _handleSettingsChanged(OscilloscopeAxisChartData newData) {
-    setState(() {
-      _oscilloscopeAxisChartData = newData;
-    });
   }
 
 }
