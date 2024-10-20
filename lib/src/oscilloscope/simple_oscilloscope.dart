@@ -29,6 +29,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   @override
   void initState() {
     super.initState();
+    _updateThresholdValue(widget.oscilloscopeAxisChartData.threshold);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateBottomPadding();
     });
@@ -213,6 +214,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               disabledInactiveTrackColor: Theme.of(context).disabledColor,
                             ),
                             child: SfSlider.vertical(
+                              stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
                               tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
                               overlayShape: const CustomOverlayShape(overlayRadius: 10),
                               thumbShape: const CustomThumbShape(thumbRadius: 10),
