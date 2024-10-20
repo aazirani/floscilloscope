@@ -28,6 +28,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
 
   late double _thresholdProgressbarMaximum;
   late double _thresholdProgressbarMinimum;
+  late double _zoomFactor = 1.0;
+  late double _zoomPosition = 0.0;
 
   @override
   void initState() {
@@ -53,7 +55,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions) {
 
       setState(() {
-        _clampThresholdProgressbarValue();
+        _thresholdProgressbarValue = _thresholdValue;
+        _handleZoom();
       });
     }
   }
@@ -117,22 +120,9 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                       ),
                       onZoomEnd: (zoom) {
                         if(zoom.axis?.isVertical ?? false){
-                          // Get the zoom factor and zoom position for the y-axis
-                          double zoomFactor = zoom.currentZoomFactor;
-                          double zoomPosition = zoom.currentZoomPosition;
-                          // Calculate the zoomed min and max for the Y-axis
-                          double currentMin = -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
-                          double currentMax = widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
-
-                          double zoomedMin = calculateZoomedMin(currentMin, currentMax, zoomFactor, zoomPosition);
-                          double zoomedMax = calculateZoomedMax(zoomedMin, currentMin, currentMax, zoomFactor);
-
-                          setState(() {
-                            _thresholdProgressbarMaximum = zoomedMax;
-                            _thresholdProgressbarMinimum = zoomedMin;
-                            _thresholdProgressbarValue = _thresholdValue;
-                            _clampThresholdProgressbarValue();
-                          });
+                          _zoomFactor = zoom.currentZoomFactor;
+                          _zoomPosition = zoom.currentZoomPosition;
+                          _handleZoom();
                         }
                       },
                       margin: EdgeInsets.zero,
@@ -202,6 +192,22 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         ),
       ],
     );
+  }
+
+  void _handleZoom() {
+    // Calculate the zoomed min and max for the Y-axis
+    double currentMin = -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
+    double currentMax = widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
+
+    double zoomedMin = calculateZoomedMin(currentMin, currentMax, _zoomFactor, _zoomPosition);
+    double zoomedMax = calculateZoomedMax(zoomedMin, currentMin, currentMax, _zoomFactor);
+
+    setState(() {
+      _thresholdProgressbarMaximum = zoomedMax;
+      _thresholdProgressbarMinimum = zoomedMin;
+      _thresholdProgressbarValue = _thresholdValue;
+      _clampThresholdProgressbarValue();
+    });
   }
 
   void _showThresholdDialog(BuildContext context) {
