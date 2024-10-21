@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 class OscilloscopeAxisChartData {
   List<List<FlSpot>> dataPoints;
   final int numberOfDivisions;
-  final String horizontalAxisTitlePerDivisionLabel;
-  final String verticalAxisTitlePerDivisionLabel;
   final String horizontalAxisLabel;
   final String verticalAxisLabel;
   final String horizontalAxisUnit;
@@ -17,7 +15,6 @@ class OscilloscopeAxisChartData {
   final String thresholdLabel;
   final bool isThresholdVisible;
   final Function(double)? onThresholdValueChanged;
-  final double pointRadius;
   final List<Color> colors;
   final bool isThresholdSliderActive;
   final double threshold;
@@ -26,8 +23,6 @@ class OscilloscopeAxisChartData {
   OscilloscopeAxisChartData({
     required this.dataPoints,
     this.numberOfDivisions = 5,
-    required this.horizontalAxisTitlePerDivisionLabel,
-    required this.verticalAxisTitlePerDivisionLabel,
     required this.horizontalAxisLabel,
     required this.verticalAxisLabel,
     required this.horizontalAxisUnit,
@@ -39,7 +34,6 @@ class OscilloscopeAxisChartData {
     this.thresholdLabel = 'Threshold',
     this.isThresholdVisible = true,
     this.onThresholdValueChanged,
-    this.pointRadius = 1.0,
     this.colors = const [Colors.teal, Colors.yellow, Colors.purple],
     this.isThresholdSliderActive = true,
     this.threshold = 0.0,

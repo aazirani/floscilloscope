@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
       thresholdDragStepSize: 2.0,
       dataPoints: [
         [
+          const FlSpot(0, 0),
+          const FlSpot(2, 3),
           const FlSpot(5, 10),
           const FlSpot(10, 10),
           const FlSpot(12, -45),

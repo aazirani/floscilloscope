@@ -1,9 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
+import 'package:floscilloscope/src/oscilloscope/threshold_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
-import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class SimpleOscilloscope extends StatefulWidget {
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
@@ -210,56 +209,31 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                widget.oscilloscopeAxisChartData.isThresholdVisible ?
-                RepaintBoundary(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 0, _sliderBottomPadding),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onDoubleTap: () {
-                              _showThresholdDialog(context);
-                            },
-                            child: SfSliderTheme(
-                              data: SfSliderThemeData(
-                                activeTrackHeight: 5,
-                                inactiveTrackHeight: 5,
-                                overlayRadius: 0,
-                                thumbRadius: 0,
-                                labelOffset: const Offset(60, 0),
-                                disabledActiveTrackColor: Theme.of(context).disabledColor,
-                                disabledInactiveTrackColor: Theme.of(context).disabledColor,
-                              ),
-                              child: SfSlider.vertical(
-                                stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
-                                tooltipTextFormatterCallback: (dynamic actualValue, String formattedText) => _thresholdValue.toStringAsFixed(2),
-                                overlayShape: const CustomOverlayShape(overlayRadius: 10),
-                                thumbShape: const CustomThumbShape(thumbRadius: 10),
-                                min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                                max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                                value: _thresholdProgressbarValue,
-                                showTicks: false,
-                                showLabels: false,
-                                enableTooltip: true,
-                                tooltipPosition: SliderTooltipPosition.left,
-                                activeColor: Theme.of(context).primaryColor,
-                                inactiveColor: Theme.of(context).primaryColor,
-                                minorTicksPerInterval: 1,
-                                onChanged: !widget.oscilloscopeAxisChartData.isThresholdSliderActive ? null : (dynamic value) {
-                                  setState(() {
-                                    _updateThresholdValue(value);
-                                  });
-                                },
-                                onChangeEnd: (dynamic value) =>  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(value.toStringAsFixed(2))),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ) : Container(),
+                ThresholdSlider(
+                  min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+                      widget.oscilloscopeAxisChartData.numberOfDivisions,
+                  max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+                      widget.oscilloscopeAxisChartData.numberOfDivisions,
+                  value: _thresholdProgressbarValue,
+                  sliderBottomPadding: _sliderBottomPadding,
+                  isSliderActive: widget.oscilloscopeAxisChartData.isThresholdSliderActive,
+                  isThresholdVisible: widget.oscilloscopeAxisChartData.isThresholdVisible,
+                  stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
+                  thresholdValue: _thresholdValue,
+                  onDoubleTap: () {
+                    _showThresholdDialog(context);
+                  },
+                  onChanged: (dynamic value) {
+                    setState(() {
+                      _updateThresholdValue(value);
+                    });
+                  },
+                  onChangeEnd: (dynamic value) {
+                    widget.oscilloscopeAxisChartData
+                        .onThresholdValueChanged
+                        ?.call(double.parse(value.toStringAsFixed(2)));
+                  },
+                ),
               ],
             ),
           ),
@@ -320,53 +294,6 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       color: Colors.grey,
       strokeWidth: 0.5,
     );
-  }
-
-}
-
-// Custom thumb shape
-class CustomThumbShape extends SfThumbShape {
-  final double thumbRadius;
-
-  const CustomThumbShape({required this.thumbRadius});
-
-  @override
-  void paint(PaintingContext context, Offset center,
-      {required RenderBox parentBox,
-        required RenderBox? child,
-        required SfSliderThemeData themeData,
-        SfRangeValues? currentValues,
-        dynamic currentValue,
-        required Paint? paint,
-        required Animation<double> enableAnimation,
-        required TextDirection textDirection,
-        required SfThumb? thumb}) {
-    final Paint paint = Paint()
-      ..color = themeData.thumbColor ?? Colors.blue;
-
-    context.canvas.drawCircle(center, thumbRadius, paint);
-  }
-}
-
-// Custom overlay shape
-class CustomOverlayShape extends SfOverlayShape {
-  final double overlayRadius;
-
-  const CustomOverlayShape({required this.overlayRadius});
-
-  @override
-  void paint(PaintingContext context, Offset center,
-      {required RenderBox parentBox,
-        required SfSliderThemeData themeData,
-        SfRangeValues? currentValues,
-        dynamic currentValue,
-        required Paint? paint,
-        required Animation<double> animation,
-        required SfThumb? thumb}) {
-    final Paint paint = Paint()
-      ..color = themeData.thumbColor ?? Colors.blue;
-
-    context.canvas.drawCircle(center, overlayRadius, paint);
   }
 
 }
