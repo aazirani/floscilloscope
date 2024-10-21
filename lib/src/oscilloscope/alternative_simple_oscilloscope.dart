@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
 import 'package:floscilloscope/src/oscilloscope/threshold_slider.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -30,6 +33,14 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   late double _thresholdProgressbarMinimum;
   late double _zoomFactor = 1.0;
   late double _zoomPosition = 0.0;
+
+  Timer? _doubleTapTimer;
+  int _pointerCount = 0;
+  final _zoomPanBehavior = ZoomPanBehavior(
+      enablePanning: true,
+      enableMouseWheelZooming: true,
+      enableSelectionZooming: true
+  );
 
   @override
   void initState() {
@@ -112,12 +123,27 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                 Flexible(
                     flex: 3,
                     child: SfCartesianChart(
-                      zoomPanBehavior: ZoomPanBehavior(
-                          enablePanning: true,
-                          enableMouseWheelZooming: true,
-                          enableDoubleTapZooming: true,
-                          enableSelectionZooming: true
-                      ),
+                      onChartTouchInteractionDown: (tapArgs) {
+                        _doubleTapTimer ??=
+                            Timer(kDoubleTapTimeout, _resetDoubleTapTimer);
+                      },
+                      onChartTouchInteractionUp: (tapArgs) {
+                        // If the second tap is detected, increment the pointer count
+                        if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
+                          _pointerCount++;
+                        }
+                        // If the pointer count is 2, then the double tap is detected
+                        if (_pointerCount == 2) {
+                          _resetDoubleTapTimer();
+                          setState(() {
+                            _zoomPanBehavior.reset();
+                            _zoomFactor = 1.0;
+                            _zoomPosition = 0.0;
+                            _handleZoom();
+                          });
+                        }
+                      },
+                      zoomPanBehavior: _zoomPanBehavior,
                       onZoomEnd: (zoom) {
                         if(zoom.axis?.isVertical ?? false){
                           _zoomFactor = zoom.currentZoomFactor;
@@ -161,14 +187,15 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                         interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
                       ),
                       series: [
-                        ...widget.oscilloscopeAxisChartData.dataPoints.map((list) {
+                        ...widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) {
                           return LineSeries<FlSpot, double>(
                             dataLabelSettings: const DataLabelSettings(isVisible: false),
                             enableTooltip: false,
-                            dataSource: list,
+                            dataSource: entry.value,
                             xValueMapper: (FlSpot data, _) => data.x,
                             yValueMapper: (FlSpot data, _) => data.y,
                             animationDuration: 0,
+                            color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
                           );
                         })
 
@@ -206,6 +233,15 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         ),
       ],
     );
+  }
+
+  // Reset the double tap timer and pointer count
+  void _resetDoubleTapTimer() {
+    _pointerCount = 0;
+    if (_doubleTapTimer != null) {
+      _doubleTapTimer!.cancel();
+      _doubleTapTimer = null;
+    }
   }
 
   void _handleZoom() {
