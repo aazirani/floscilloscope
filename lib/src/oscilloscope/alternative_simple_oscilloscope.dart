@@ -128,11 +128,22 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                       margin: EdgeInsets.zero,
                       enableAxisAnimation: false,
                       primaryXAxis: NumericAxis(
+                        title: AxisTitle(
+                            text: widget.oscilloscopeAxisChartData.horizontalAxisLabel
+                        ),
+                        labelFormat: "{value}${widget.oscilloscopeAxisChartData.horizontalAxisUnit}",
                         key: _primaryXAxisRenderKey,
                         minimum: 0,
                         maximum: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        minorGridLines: const MinorGridLines(width: 0),
+                        interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
                       ),
                       primaryYAxis: NumericAxis(
+                        title: AxisTitle(
+                            text: widget.oscilloscopeAxisChartData.verticalAxisLabel
+                        ),
+                        labelFormat: "{value}${widget.oscilloscopeAxisChartData.verticalAxisUnit}",
                         plotBands: [
                           PlotBand(
                               start: _thresholdProgressbarValue,
@@ -145,6 +156,9 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                         key: _primaryYAxisRenderKey,
                         minimum: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
                         maximum: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        minorGridLines: const MinorGridLines(width: 0),
+                        interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
                       ),
                       series: [
                         ...widget.oscilloscopeAxisChartData.dataPoints.map((list) {
