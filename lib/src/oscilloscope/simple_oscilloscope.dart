@@ -28,7 +28,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   @override
   void initState() {
     super.initState();
-    _updateThresholdValue(widget.oscilloscopeAxisChartData.threshold);
+    _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
+    _updateThresholdProgressbarValue(_thresholdValue);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateBottomPadding();
     });
@@ -44,9 +45,12 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
-        widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions) {
+        widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
+        _thresholdValue != widget.oscilloscopeAxisChartData.threshold) {
 
       setState(() {
+        _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
+        _thresholdProgressbarValue = _thresholdValue;
         _clampThresholdProgressbarValue();
       });
     }
@@ -69,11 +73,10 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
     }
   }
 
-  void _updateThresholdValue([double? value]) {
+  void _updateThresholdProgressbarValue([double? value]) {
     if (value != null) {
       value = double.parse(value.toStringAsFixed(2));
       _thresholdProgressbarValue = value;
-      _thresholdValue = value;
     }
     _clampThresholdProgressbarValue();
   }
@@ -225,10 +228,14 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                   },
                   onChanged: (dynamic value) {
                     setState(() {
-                      _updateThresholdValue(value);
+                      _updateThresholdProgressbarValue(value);
                     });
                   },
                   onChangeEnd: (dynamic value) {
+                    _thresholdValue = value;
+                    setState(() {
+                      _updateThresholdProgressbarValue(value);
+                    });
                     widget.oscilloscopeAxisChartData
                         .onThresholdValueChanged
                         ?.call(double.parse(value.toStringAsFixed(2)));
@@ -260,7 +267,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
             ],
             onFieldSubmitted: (value) {
               setState(() {
-                _updateThresholdValue(newValue);
+                _thresholdValue = newValue;
+                _updateThresholdProgressbarValue(newValue);
                 widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
               });
               Navigator.of(context).pop();
@@ -271,7 +279,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
               onPressed: () {
                 setState(() {
-                  _updateThresholdValue(newValue);
+                  _thresholdValue = newValue;
+                  _updateThresholdProgressbarValue(newValue);
                   widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
                 });
                 Navigator.of(context).pop();

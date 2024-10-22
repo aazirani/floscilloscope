@@ -59,10 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ]
       ],
       numberOfDivisions: 5,
-      horizontalAxisTitlePerDivisionLabel: 'Time/Division',
       horizontalAxisLabel: 'Time',
       horizontalAxisUnit: 'µs',
-      verticalAxisTitlePerDivisionLabel: 'Voltage/Division',
       verticalAxisLabel: 'Voltage',
       verticalAxisUnit: 'mV',
       updateButtonLabel: 'Update',
@@ -87,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Expanded(
-                child: SimpleOscilloscope(
+                child: AlternativeSimpleOscilloscope(
                   oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
                 )
             ),

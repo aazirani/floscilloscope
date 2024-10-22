@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
-class ThresholdSlider extends StatelessWidget {
+class ThresholdSlider extends StatefulWidget {
   final double min;
   final double max;
   final double value;
@@ -13,8 +13,8 @@ class ThresholdSlider extends StatelessWidget {
   final double thresholdValue;
   final String? tooltipText;
   final VoidCallback? onDoubleTap;
-  final ValueChanged<dynamic>? onChanged;
-  final ValueChanged<dynamic>? onChangeEnd;
+  final ValueChanged<dynamic> onChanged;
+  final ValueChanged<dynamic> onChangeEnd;
 
   const ThresholdSlider({
     super.key,
@@ -28,21 +28,44 @@ class ThresholdSlider extends StatelessWidget {
     required this.thresholdValue,
     this.tooltipText,
     this.onDoubleTap,
-    this.onChanged,
-    this.onChangeEnd,
+    required this.onChanged,
+    required this.onChangeEnd,
   });
 
   @override
+  State<ThresholdSlider> createState() => _ThresholdSliderState();
+}
+
+class _ThresholdSliderState extends State<ThresholdSlider> {
+
+  late double _tempThresholdValue;
+  bool _isUserDragging = false; // New flag to track user interaction
+
+  @override
+  void initState() {
+    super.initState();
+    _tempThresholdValue = widget.thresholdValue;
+  }
+
+  @override
+  void didUpdateWidget(covariant ThresholdSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_isUserDragging) {
+      _tempThresholdValue = widget.thresholdValue;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return isThresholdVisible
+    return widget.isThresholdVisible
         ? RepaintBoundary(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, sliderBottomPadding),
+        padding: EdgeInsets.fromLTRB(0, 0, 0, widget.sliderBottomPadding),
         child: Column(
           children: [
             Expanded(
               child: GestureDetector(
-                onDoubleTap: onDoubleTap,
+                onDoubleTap: widget.onDoubleTap,
                 child: SfSliderTheme(
                   data: SfSliderThemeData(
                     activeTrackHeight: 5,
@@ -56,16 +79,16 @@ class ThresholdSlider extends StatelessWidget {
                     Theme.of(context).disabledColor,
                   ),
                   child: SfSlider.vertical(
-                    stepSize: stepSize,
+                    stepSize: widget.stepSize,
                     tooltipTextFormatterCallback: (dynamic actualValue,
                         String formattedText) =>
-                        thresholdValue.toStringAsFixed(2),
+                        _tempThresholdValue.toStringAsFixed(2),
                     overlayShape:
                     const CustomOverlayShape(overlayRadius: 10),
                     thumbShape: const CustomThumbShape(thumbRadius: 10),
-                    min: min,
-                    max: max,
-                    value: value,
+                    min: widget.min,
+                    max: widget.max,
+                    value: widget.value,
                     showTicks: false,
                     showLabels: false,
                     enableTooltip: true,
@@ -73,8 +96,22 @@ class ThresholdSlider extends StatelessWidget {
                     activeColor: Theme.of(context).primaryColor,
                     inactiveColor: Theme.of(context).primaryColor,
                     minorTicksPerInterval: 1,
-                    onChanged: isSliderActive ? onChanged : null,
-                    onChangeEnd: onChangeEnd,
+                    onChanged: (value) {
+                      if(widget.isSliderActive){
+                        setState(() {
+                          _isUserDragging = true;
+                          _tempThresholdValue = value;
+                        });
+                        widget.onChanged(value);
+                      }
+                    },
+                    onChangeEnd: (value) {
+                      setState(() {
+                        _isUserDragging = false;
+                        _tempThresholdValue = value;
+                      });
+                      widget.onChangeEnd(value);
+                    },
                   ),
                 ),
               ),
