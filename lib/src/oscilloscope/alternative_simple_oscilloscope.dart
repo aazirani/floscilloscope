@@ -178,8 +178,20 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                               end: _thresholdProgressbarValue,
                               borderColor: Theme.of(context).primaryColor, // Line color
                               borderWidth: 2,
-                              dashArray: const <double>[5, 5]
+                              dashArray: const <double>[5, 5],
+                              shouldRenderAboveSeries: true
                           ),
+                          if (widget.oscilloscopeAxisChartData.extraPlotLines != null)
+                            ...widget.oscilloscopeAxisChartData.extraPlotLines!.entries.map((entry) {
+                              return PlotBand(
+                                start: entry.key,
+                                end: entry.key,
+                                borderColor: entry.value,
+                                borderWidth: 2,
+                                dashArray: const <double>[5, 5],
+                                shouldRenderAboveSeries: true
+                              );
+                            })
                         ],
                         key: _primaryYAxisRenderKey,
                         minimum: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
