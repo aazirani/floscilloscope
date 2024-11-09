@@ -203,8 +203,17 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               y: _thresholdProgressbarValue,
                               color: Theme.of(context).primaryColor,
                               strokeWidth: 2,
-                              dashArray: [5, 5],
+                              dashArray: const [5, 5],
                             ),
+                            if (widget.oscilloscopeAxisChartData.extraPlotLines != null)
+                              ...widget.oscilloscopeAxisChartData.extraPlotLines!.entries.map((entry) {
+                                return HorizontalLine(
+                                    y: entry.key,
+                                    color: entry.value,
+                                    strokeWidth: 2,
+                                    dashArray: const [5, 5]
+                                );
+                              })
                           ],
                         ) : null,
                       ),
