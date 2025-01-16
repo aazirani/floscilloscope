@@ -37,7 +37,7 @@ A customizable oscilloscope widget for Flutter, providing features such as dynam
 - **Extra Plot Lines:** Add additional horizontal lines for markers or reference points.
 - **Interactive Threshold Manipulation:** Double-tap to reset thresholds or open dialogs for precise adjustments.
 - **Optimized Performance:** Efficient rendering with `RepaintBoundary` and optimized widget structures.
-- **Multiple Chart Libraries:** Possibility to use the syncfusion_flutter_charts as well as the fl_chart package, depending on your preference.
+- **Multiple Chart Libraries:** Possibility to use the [syncfusion_flutter_charts](https://pub.dev/packages/syncfusion_flutter_charts) as well as the [fl_chart](https://pub.dev/packages/fl_chart) packages, depending on your preference.
 
 ## Installation
 
