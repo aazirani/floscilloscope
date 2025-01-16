@@ -1,7 +1,9 @@
 name: floscilloscope
-description: "A new Flutter package project."
-version: 0.0.1
-homepage:
+description: "A customizable oscilloscope widget for Flutter, providing features such as dynamic chart rendering, threshold manipulation, zooming and panning, customizable axes, support for multiple data series, and interactive threshold sliders."
+version: 1.0.0
+homepage: https://github.com/aazirani/floscilloscope
+repository: https://github.com/aazirani/floscilloscope
+
 
 environment:
   sdk: '>=3.3.4 <4.0.0'

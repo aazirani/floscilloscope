@@ -45,10 +45,7 @@ Add `floscilloscope` as a dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floscilloscope:
-  git:
-    url: https://github.com/aazirani/floscilloscope
-    ref: main
+  floscilloscope: ^1.0.0
 ```
 
 Then run `flutter pub get` to fetch the package.
@@ -234,6 +231,8 @@ Thank you for considering sponsoring my work!
 [![GitHub: aazirani](https://img.shields.io/badge/aazirani-EFF7F6?logo=GitHub&logoColor=333&link=https://www.github.com/aazirani)][github]
 [![Instagram: aazirani](https://img.shields.io/badge/aazirani-EFF7F6?logo=Instagram&link=https://www.instagram.com/aazirani)][instagram]
 [![Twitter: aazirani](https://img.shields.io/badge/aazirani-EFF7F6?logo=X&logoColor=333&link=https://x.com/aazirani)][twitter]
+[![Website: aminazirani.com](https://img.shields.io/badge/aminazirani.com-EFF7F6?logo=firefox&logoColor=333&link=https://aminazirani.com)][website]
+
 
 [pub]: https://pub.dev/packages/floscilloscope
 [github]: https://github.com/aazirani
@@ -244,3 +243,4 @@ Thank you for considering sponsoring my work!
 [issues]: https://github.com/aazirani/floscilloscope/issues
 [license]: https://github.com/aazirani/floscilloscope/blob/master/LICENSE
 [pulls]: https://github.com/aazirani/floscilloscope/pulls
+[Website]: https://aminazirani.com/
