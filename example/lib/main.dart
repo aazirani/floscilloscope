@@ -34,7 +34,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
   final OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
       threshold: 2.0,
@@ -65,13 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
       verticalAxisUnit: 'mV',
       updateButtonLabel: 'Update',
       onThresholdValueChanged: (value) => log(value.toString()),
+      enableTooltip: true
   );
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

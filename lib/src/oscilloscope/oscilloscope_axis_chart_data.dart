@@ -20,6 +20,7 @@ class OscilloscopeAxisChartData {
   final double threshold;
   final double? thresholdDragStepSize;
   final Map<double, Color>? extraPlotLines;
+  final bool enableTooltip;
 
   OscilloscopeAxisChartData({
     required this.dataPoints,
@@ -40,5 +41,6 @@ class OscilloscopeAxisChartData {
     this.threshold = 0.0,
     this.thresholdDragStepSize,
     this.extraPlotLines,
+    this.enableTooltip = false,
   });
 }
