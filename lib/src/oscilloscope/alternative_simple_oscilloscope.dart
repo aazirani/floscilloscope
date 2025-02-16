@@ -90,39 +90,46 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
 
   void _updateSeries(List<List<FlSpot>> dataPoints) {
     dataPoints.asMap().forEach((index, newFlSpots) {
-      final currentDataSource = _series[index].dataSource;
+      // Ensure the series list is initialized and has the right length
+      if (_series.length > index) {
+        final currentDataSource = _series[index].dataSource;
 
-      if (currentDataSource != null) {
-        // Determine the number of points to replace
-        final minLength = currentDataSource.length < newFlSpots.length ? currentDataSource.length : newFlSpots.length;
+        if (currentDataSource != null) {
+          // Determine the number of points to replace
+          final minLength = currentDataSource.length < newFlSpots.length ? currentDataSource.length : newFlSpots.length;
 
-        // Replace existing points with new points up to the minimum length
-        for (int i = 0; i < minLength; i++) {
-          currentDataSource[i] = newFlSpots[i];
+          // Replace existing points with new points up to the minimum length
+          for (int i = 0; i < minLength; i++) {
+            currentDataSource[i] = newFlSpots[i];
+          }
+
+          // If new points are longer, add the additional points
+          if (newFlSpots.length > currentDataSource.length) {
+            currentDataSource.addAll(newFlSpots.sublist(currentDataSource.length));
+          }
+          // If new points are shorter, remove the extra points
+          else if (newFlSpots.length < currentDataSource.length) {
+            currentDataSource.removeRange(newFlSpots.length, currentDataSource.length);
+          }
+
+          // Notify the chart to update the series' data source
+          _seriesControllers?[index].updateDataSource(
+            updatedDataIndexes: List.generate(minLength, (i) => i),
+            addedDataIndexes: newFlSpots.length > currentDataSource.length
+                ? List.generate(newFlSpots.length - currentDataSource.length, (i) => currentDataSource.length + i)
+                : null,
+            removedDataIndexes: newFlSpots.length < currentDataSource.length
+                ? List.generate(currentDataSource.length - newFlSpots.length, (i) => newFlSpots.length + i)
+                : null,
+          );
         }
-
-        // If new points are longer, add the additional points
-        if (newFlSpots.length > currentDataSource.length) {
-          currentDataSource.addAll(newFlSpots.sublist(currentDataSource.length));
-        }
-        // If new points are shorter, remove the extra points
-        else if (newFlSpots.length < currentDataSource.length) {
-          currentDataSource.removeRange(newFlSpots.length, currentDataSource.length);
-        }
-
-        // Notify the chart to update the series' data source
-        _seriesControllers?[index].updateDataSource(
-          updatedDataIndexes: List.generate(minLength, (i) => i),
-          addedDataIndexes: newFlSpots.length > currentDataSource.length
-              ? List.generate(newFlSpots.length - currentDataSource.length, (i) => currentDataSource.length + i)
-              : null,
-          removedDataIndexes: newFlSpots.length < currentDataSource.length
-              ? List.generate(currentDataSource.length - newFlSpots.length, (i) => newFlSpots.length + i)
-              : null,
-        );
+      } else {
+        // Handle the case where the series list has not been initialized properly
+        debugPrint("Series at index $index is not initialized or out of range.");
       }
     });
   }
+
 
   @override
   void didUpdateWidget(covariant AlternativeSimpleOscilloscope oldWidget) {
