@@ -129,7 +129,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                         enable: widget.oscilloscopeAxisChartData.enableTooltip,
                         animationDuration: 0,
                         duration: 1000,
-                        header: ""
+                        header: "",
+                        shouldAlwaysShow: true,
                       ),
                       onChartTouchInteractionDown: (tapArgs) {
                         _doubleTapTimer ??=
