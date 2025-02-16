@@ -25,7 +25,7 @@ class AlternativeSimpleOscilloscope extends StatefulWidget {
 class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscilloscope> {
 
   late List<LineSeries<FlSpot, double>> _series;
-  List<ChartSeriesController>? _seriesControllers;
+  List<ChartSeriesController<dynamic, dynamic>?>? _seriesControllers;
 
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
@@ -72,10 +72,13 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   }
 
   void _createTheSeries(List<List<FlSpot>> dataPoints) {
+    // Initialize the controllers list with the same length as dataPoints.
+    _seriesControllers = List<ChartSeriesController<dynamic, dynamic>?>.filled(dataPoints.length, null);
+
     _series = dataPoints.asMap().entries.map((entry) {
       return LineSeries<FlSpot, double>(
         onRendererCreated: (controller) {
-          _seriesControllers?[entry.key] = controller;
+          _seriesControllers![entry.key] = controller;
         },
         dataLabelSettings: const DataLabelSettings(isVisible: false),
         enableTooltip: widget.oscilloscopeChartData.enableTooltip,
@@ -83,52 +86,57 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         xValueMapper: (FlSpot data, _) => data.x,
         yValueMapper: (FlSpot data, _) => data.y,
         animationDuration: 0,
-        color: widget.oscilloscopeChartData.colors[entry.key % widget.oscilloscopeChartData.colors.length],
+        color: widget.oscilloscopeChartData.colors[entry.key %
+            widget.oscilloscopeChartData.colors.length],
       );
     }).toList();
   }
 
   void _updateSeries(List<List<FlSpot>> dataPoints) {
     dataPoints.asMap().forEach((index, newFlSpots) {
-      // Ensure the series list is initialized and has the right length
-      if (_series.length > index) {
+      if (index < _series.length) {
         final currentDataSource = _series[index].dataSource;
-
         if (currentDataSource != null) {
-          // Determine the number of points to replace
-          final minLength = currentDataSource.length < newFlSpots.length ? currentDataSource.length : newFlSpots.length;
+          // Save old length to compute added/removed indexes.
+          final int oldLength = currentDataSource.length;
+          final int minLength = oldLength < newFlSpots.length ? oldLength : newFlSpots.length;
 
-          // Replace existing points with new points up to the minimum length
+          // Update common indices.
           for (int i = 0; i < minLength; i++) {
             currentDataSource[i] = newFlSpots[i];
           }
 
-          // If new points are longer, add the additional points
-          if (newFlSpots.length > currentDataSource.length) {
-            currentDataSource.addAll(newFlSpots.sublist(currentDataSource.length));
+          // If new data has additional points, add them.
+          if (newFlSpots.length > oldLength) {
+            currentDataSource.addAll(newFlSpots.sublist(oldLength));
           }
-          // If new points are shorter, remove the extra points
-          else if (newFlSpots.length < currentDataSource.length) {
-            currentDataSource.removeRange(newFlSpots.length, currentDataSource.length);
+          // Or if new data is shorter, remove extra points.
+          else if (newFlSpots.length < oldLength) {
+            currentDataSource.removeRange(newFlSpots.length, oldLength);
           }
 
-          // Notify the chart to update the series' data source
-          _seriesControllers?[index].updateDataSource(
-            updatedDataIndexes: List.generate(minLength, (i) => i),
-            addedDataIndexes: newFlSpots.length > currentDataSource.length
-                ? List.generate(newFlSpots.length - currentDataSource.length, (i) => currentDataSource.length + i)
-                : null,
-            removedDataIndexes: newFlSpots.length < currentDataSource.length
-                ? List.generate(currentDataSource.length - newFlSpots.length, (i) => newFlSpots.length + i)
-                : null,
-          );
+          // Now notify the chart.
+          final controller = _seriesControllers?[index];
+          if (controller != null) {
+            controller.updateDataSource(
+              updatedDataIndexes: List.generate(minLength, (i) => i),
+              addedDataIndexes: newFlSpots.length > oldLength
+                  ? List.generate(newFlSpots.length - oldLength, (i) => oldLength + i)
+                  : null,
+              removedDataIndexes: newFlSpots.length < oldLength
+                  ? List.generate(oldLength - newFlSpots.length, (i) => newFlSpots.length + i)
+                  : null,
+            );
+          }
         }
       } else {
-        // Handle the case where the series list has not been initialized properly
+        // Series at this index is not yet created.
+        _createTheSeries(dataPoints);
         debugPrint("Series at index $index is not initialized or out of range.");
       }
     });
   }
+
 
 
   @override
@@ -195,8 +203,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
             child: Row(
               children: [
                 Flexible(
-                    flex: 3,
-                    child: SfCartesianChart(
+                  flex: 3,
+                  child: SfCartesianChart(
                       tooltipBehavior: TooltipBehavior(
                         enable: widget.oscilloscopeChartData.enableTooltip,
                         animationDuration: 0,
@@ -280,7 +288,7 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                         interval: widget.oscilloscopeChartData.verticalAxisValuePerDivision,
                       ),
                       series: _series
-                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 ThresholdSlider(
