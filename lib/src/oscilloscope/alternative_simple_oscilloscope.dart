@@ -10,12 +10,12 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 class AlternativeSimpleOscilloscope extends StatefulWidget {
   final OscilloscopeChartData oscilloscopeChartData;
-  final List<List<FlSpot>> dataPoints;
+  final ValueNotifier<List<List<FlSpot>>> dataPointsNotifier;
 
   const AlternativeSimpleOscilloscope({
     super.key,
     required this.oscilloscopeChartData,
-    required this.dataPoints
+    required this.dataPointsNotifier
   });
 
   @override
@@ -126,103 +126,108 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
               children: [
                 Flexible(
                     flex: 3,
-                    child: SfCartesianChart(
-                      tooltipBehavior: TooltipBehavior(
-                        enable: widget.oscilloscopeChartData.enableTooltip,
-                        animationDuration: 0,
-                        duration: 1000,
-                        header: "",
-                        shouldAlwaysShow: true,
-                      ),
-                      onChartTouchInteractionDown: (tapArgs) {
-                        _doubleTapTimer ??=
-                            Timer(kDoubleTapTimeout, _resetDoubleTapTimer);
-                      },
-                      onChartTouchInteractionUp: (tapArgs) {
-                        // If the second tap is detected, increment the pointer count
-                        if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
-                          _pointerCount++;
-                        }
-                        // If the pointer count is 2, then the double tap is detected
-                        if (_pointerCount == 2) {
-                          _resetDoubleTapTimer();
-                          setState(() {
-                            _zoomPanBehavior.reset();
-                            _zoomFactor = 1.0;
-                            _zoomPosition = 0.0;
-                            _handleZoom();
-                          });
-                        }
-                      },
-                      zoomPanBehavior: _zoomPanBehavior,
-                      onZoomEnd: (zoom) {
-                        if(zoom.axis?.isVertical ?? false){
-                          _zoomFactor = zoom.currentZoomFactor;
-                          _zoomPosition = zoom.currentZoomPosition;
-                          _handleZoom();
-                        }
-                      },
-                      margin: EdgeInsets.zero,
-                      enableAxisAnimation: false,
-                      primaryXAxis: NumericAxis(
-                        title: AxisTitle(
-                            text: widget.oscilloscopeChartData.horizontalAxisLabel
-                        ),
-                        labelFormat: "{value}${widget.oscilloscopeChartData.horizontalAxisUnit}",
-                        key: _primaryXAxisRenderKey,
-                        minimum: 0,
-                        maximum: widget.oscilloscopeChartData.horizontalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions * 2,
-                        edgeLabelPlacement: EdgeLabelPlacement.shift,
-                        minorGridLines: const MinorGridLines(width: 0),
-                        interval: widget.oscilloscopeChartData.horizontalAxisValuePerDivision,
-                      ),
-                      primaryYAxis: NumericAxis(
-                        title: AxisTitle(
-                            text: widget.oscilloscopeChartData.verticalAxisLabel
-                        ),
-                        labelFormat: "{value}${widget.oscilloscopeChartData.verticalAxisUnit}",
-                        plotBands: [
-                          PlotBand(
-                              start: _thresholdProgressbarValue,
-                              end: _thresholdProgressbarValue,
-                              borderColor: Theme.of(context).primaryColor, // Line color
-                              borderWidth: 2,
-                              dashArray: const <double>[5, 5],
-                              shouldRenderAboveSeries: true
+                    child: ValueListenableBuilder<List<List<FlSpot>>>(
+                      valueListenable: widget.dataPointsNotifier,
+                      builder: (context, dataPoints, child) {
+                        return SfCartesianChart(
+                          tooltipBehavior: TooltipBehavior(
+                            enable: widget.oscilloscopeChartData.enableTooltip,
+                            animationDuration: 0,
+                            duration: 1000,
+                            header: "",
+                            shouldAlwaysShow: true,
                           ),
-                          if (widget.oscilloscopeChartData.extraPlotLines != null)
-                            ...widget.oscilloscopeChartData.extraPlotLines!.entries.map((entry) {
-                              return PlotBand(
-                                start: entry.key,
-                                end: entry.key,
-                                borderColor: entry.value,
-                                borderWidth: 2,
-                                dashArray: const <double>[5, 5],
-                                shouldRenderAboveSeries: true
+                          onChartTouchInteractionDown: (tapArgs) {
+                            _doubleTapTimer ??=
+                                Timer(kDoubleTapTimeout, _resetDoubleTapTimer);
+                          },
+                          onChartTouchInteractionUp: (tapArgs) {
+                            // If the second tap is detected, increment the pointer count
+                            if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
+                              _pointerCount++;
+                            }
+                            // If the pointer count is 2, then the double tap is detected
+                            if (_pointerCount == 2) {
+                              _resetDoubleTapTimer();
+                              setState(() {
+                                _zoomPanBehavior.reset();
+                                _zoomFactor = 1.0;
+                                _zoomPosition = 0.0;
+                                _handleZoom();
+                              });
+                            }
+                          },
+                          zoomPanBehavior: _zoomPanBehavior,
+                          onZoomEnd: (zoom) {
+                            if(zoom.axis?.isVertical ?? false){
+                              _zoomFactor = zoom.currentZoomFactor;
+                              _zoomPosition = zoom.currentZoomPosition;
+                              _handleZoom();
+                            }
+                          },
+                          margin: EdgeInsets.zero,
+                          enableAxisAnimation: false,
+                          primaryXAxis: NumericAxis(
+                            title: AxisTitle(
+                                text: widget.oscilloscopeChartData.horizontalAxisLabel
+                            ),
+                            labelFormat: "{value}${widget.oscilloscopeChartData.horizontalAxisUnit}",
+                            key: _primaryXAxisRenderKey,
+                            minimum: 0,
+                            maximum: widget.oscilloscopeChartData.horizontalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions * 2,
+                            edgeLabelPlacement: EdgeLabelPlacement.shift,
+                            minorGridLines: const MinorGridLines(width: 0),
+                            interval: widget.oscilloscopeChartData.horizontalAxisValuePerDivision,
+                          ),
+                          primaryYAxis: NumericAxis(
+                            title: AxisTitle(
+                                text: widget.oscilloscopeChartData.verticalAxisLabel
+                            ),
+                            labelFormat: "{value}${widget.oscilloscopeChartData.verticalAxisUnit}",
+                            plotBands: [
+                              PlotBand(
+                                  start: _thresholdProgressbarValue,
+                                  end: _thresholdProgressbarValue,
+                                  borderColor: Theme.of(context).primaryColor, // Line color
+                                  borderWidth: 2,
+                                  dashArray: const <double>[5, 5],
+                                  shouldRenderAboveSeries: true
+                              ),
+                              if (widget.oscilloscopeChartData.extraPlotLines != null)
+                                ...widget.oscilloscopeChartData.extraPlotLines!.entries.map((entry) {
+                                  return PlotBand(
+                                      start: entry.key,
+                                      end: entry.key,
+                                      borderColor: entry.value,
+                                      borderWidth: 2,
+                                      dashArray: const <double>[5, 5],
+                                      shouldRenderAboveSeries: true
+                                  );
+                                })
+                            ],
+                            key: _primaryYAxisRenderKey,
+                            minimum: -widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
+                            maximum: widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
+                            edgeLabelPlacement: EdgeLabelPlacement.shift,
+                            minorGridLines: const MinorGridLines(width: 0),
+                            interval: widget.oscilloscopeChartData.verticalAxisValuePerDivision,
+                          ),
+                          series: [
+                            ...dataPoints.asMap().entries.map((entry) {
+                              return LineSeries<FlSpot, double>(
+                                dataLabelSettings: const DataLabelSettings(isVisible: false),
+                                enableTooltip: widget.oscilloscopeChartData.enableTooltip,
+                                dataSource: entry.value,
+                                xValueMapper: (FlSpot data, _) => data.x,
+                                yValueMapper: (FlSpot data, _) => data.y,
+                                animationDuration: 0,
+                                color: widget.oscilloscopeChartData.colors[entry.key % widget.oscilloscopeChartData.colors.length],
                               );
                             })
-                        ],
-                        key: _primaryYAxisRenderKey,
-                        minimum: -widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
-                        maximum: widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
-                        edgeLabelPlacement: EdgeLabelPlacement.shift,
-                        minorGridLines: const MinorGridLines(width: 0),
-                        interval: widget.oscilloscopeChartData.verticalAxisValuePerDivision,
-                      ),
-                      series: [
-                        ...widget.dataPoints.asMap().entries.map((entry) {
-                          return LineSeries<FlSpot, double>(
-                            dataLabelSettings: const DataLabelSettings(isVisible: false),
-                            enableTooltip: widget.oscilloscopeChartData.enableTooltip,
-                            dataSource: entry.value,
-                            xValueMapper: (FlSpot data, _) => data.x,
-                            yValueMapper: (FlSpot data, _) => data.y,
-                            animationDuration: 0,
-                            color: widget.oscilloscopeChartData.colors[entry.key % widget.oscilloscopeChartData.colors.length],
-                          );
-                        })
 
-                      ],
+                          ],
+                        );
+                      }
                     )
                 ),
                 const SizedBox(width: 16),
