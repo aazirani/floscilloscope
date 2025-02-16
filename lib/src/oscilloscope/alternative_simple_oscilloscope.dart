@@ -125,6 +125,13 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                 Flexible(
                     flex: 3,
                     child: SfCartesianChart(
+                      tooltipBehavior: TooltipBehavior(
+                        enable: widget.oscilloscopeAxisChartData.enableTooltip,
+                        animationDuration: 0,
+                        duration: 1000,
+                        header: "",
+                        shouldAlwaysShow: true,
+                      ),
                       onChartTouchInteractionDown: (tapArgs) {
                         _doubleTapTimer ??=
                             Timer(kDoubleTapTimeout, _resetDoubleTapTimer);
@@ -204,7 +211,7 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                         ...widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) {
                           return LineSeries<FlSpot, double>(
                             dataLabelSettings: const DataLabelSettings(isVisible: false),
-                            enableTooltip: false,
+                            enableTooltip: widget.oscilloscopeAxisChartData.enableTooltip,
                             dataSource: entry.value,
                             xValueMapper: (FlSpot data, _) => data.x,
                             yValueMapper: (FlSpot data, _) => data.y,

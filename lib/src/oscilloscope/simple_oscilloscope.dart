@@ -100,16 +100,20 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                       key: _chartAndLabelAreaRenderKey,
                       chartRendererKey: _chartAreaRenderKey,
                       LineChartData(
-                        lineTouchData: const LineTouchData(enabled: false),
+                        lineTouchData: LineTouchData(
+                          enabled: widget.oscilloscopeAxisChartData.enableTooltip,
+                          getTouchLineStart: (barData, spotIndex) => 0,
+                          getTouchLineEnd: (barData, spotIndex) => 0,
+                        ),
                         lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.isNotEmpty ? widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
                             LineChartBarData(
                               spots: entry.value,
                               isCurved: false,
                               preventCurveOverShooting: true,
                               color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
-                                dotData: const FlDotData(
-                                  show: false,  // Disable dots to improve performance
-                                ),
+                              dotData: const FlDotData(
+                                show: false,  // Disable dots to improve performance
+                              ),
                             ),
                         ).toList() : [LineChartBarData()],
                         gridData: FlGridData(
@@ -144,7 +148,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               getTitlesWidget: (value, meta) {
                                 return RepaintBoundary(
                                   child: SideTitleWidget(
-                                    axisSide: meta.axisSide,
+                                    meta: meta,
                                     child: Text(
                                       '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
                                     ),
@@ -163,7 +167,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               getTitlesWidget: (value, meta) {
                                 return RepaintBoundary(
                                   child: SideTitleWidget(
-                                    axisSide: meta.axisSide,
+                                    meta: meta,
                                     child: Column(
                                       children: [
                                         Expanded(
