@@ -1,5 +1,5 @@
 name: floscilloscope
-description: "A customizable oscilloscope widget for Flutter, providing features such as dynamic chart rendering, threshold manipulation, zooming and panning, customizable axes, support for multiple data series, and interactive threshold sliders."
+description: "A customizable oscilloscope widget for Flutter"
 version: 1.0.0
 homepage: https://github.com/aazirani/floscilloscope
 repository: https://github.com/aazirani/floscilloscope
@@ -10,17 +10,17 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  syncfusion_flutter_core: ^27.1.52
-  syncfusion_flutter_sliders: ^27.1.52
-  fl_chart: ^0.69.0
+  syncfusion_flutter_core: ^28.2.5
+  syncfusion_flutter_sliders: ^28.2.5
+  fl_chart: ^0.70.2
   flutter:
     sdk: flutter
-  syncfusion_flutter_charts: ^27.1.53
+  syncfusion_flutter_charts: ^28.2.5+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
