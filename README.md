@@ -21,7 +21,7 @@ A customizable oscilloscope widget for Flutter, providing features such as dynam
     - [Usage](#usage)
         - [Using `SimpleOscilloscope` Widget](#using-simpleoscilloscope-widget)
         - [Using `AlternativeSimpleOscilloscope` Widget](#using-alternativesimpleoscilloscope-widget)
-        - [Configuring `OscilloscopeAxisChartData`](#configuring-oscilloscopeaxischartdata)
+        - [Configuring `OscilloscopeChartData`](#configuring-oscilloscopechartdata)
     - [Contributing](#contributing)
     - [License](#license)
     - [Sponsor Me](#sponsor-me)
@@ -73,7 +73,7 @@ class OscilloscopeExample extends StatelessWidget {
       FlSpot(5, 2),
     ];
 
-    final oscilloscopeData = OscilloscopeAxisChartData(
+    final oscilloscopeData = OscilloscopeChartData(
       dataPoints: [data],
       horizontalAxisLabel: 'Time',
       verticalAxisLabel: 'Amplitude',
@@ -90,7 +90,7 @@ class OscilloscopeExample extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SimpleOscilloscope(
-          oscilloscopeAxisChartData: oscilloscopeData,
+          oscilloscopeChartData: oscilloscopeData,
         ),
       ),
     );
@@ -126,7 +126,7 @@ class AlternativeOscilloscopeExample extends StatelessWidget {
       FlSpot(4, 3),
     ];
 
-    final oscilloscopeData = OscilloscopeAxisChartData(
+    final oscilloscopeData = OscilloscopeChartData(
       dataPoints: [dataSeries1, dataSeries2],
       horizontalAxisLabel: 'Time',
       verticalAxisLabel: 'Voltage',
@@ -144,7 +144,7 @@ class AlternativeOscilloscopeExample extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: AlternativeSimpleOscilloscope(
-          oscilloscopeAxisChartData: oscilloscopeData,
+          oscilloscopeChartData: oscilloscopeData,
         ),
       ),
     );
@@ -152,12 +152,12 @@ class AlternativeOscilloscopeExample extends StatelessWidget {
 }
 ```
 
-### Configuring `OscilloscopeAxisChartData`
+### Configuring `OscilloscopeChartData`
 
-Customize the oscilloscope's appearance and behavior using the `OscilloscopeAxisChartData` class.
+Customize the oscilloscope's appearance and behavior using the `OscilloscopeChartData` class.
 
 ```dart
-final oscilloscopeData = OscilloscopeAxisChartData(
+final oscilloscopeData = OscilloscopeChartData(
   dataPoints: [dataSeries1, dataSeries2],
   numberOfDivisions: 5,
   horizontalAxisLabel: 'Time',

@@ -35,28 +35,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final OscilloscopeAxisChartData _oscilloscopeAxisChartData = OscilloscopeAxisChartData(
+  final OscilloscopeChartData _oscilloscopeChartData = OscilloscopeChartData(
       threshold: 2.0,
       thresholdDragStepSize: 2.0,
-      dataPoints: [
-        [
-          const FlSpot(0, 0),
-          const FlSpot(2, 3),
-          const FlSpot(5, 10),
-          const FlSpot(10, 10),
-          const FlSpot(12, -45),
-        ],
-        [
-          const FlSpot(1, 4),
-          const FlSpot(75, 23),
-          const FlSpot(19, -20),
-        ],
-        [
-          const FlSpot(56, 2),
-          const FlSpot(98, 101),
-          const FlSpot(109, 150),
-        ]
-      ],
       numberOfDivisions: 5,
       horizontalAxisLabel: 'Time',
       horizontalAxisUnit: 'µs',
@@ -80,7 +61,26 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Expanded(
                 child: AlternativeSimpleOscilloscope(
-                  oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
+                  oscilloscopeChartData: _oscilloscopeChartData,
+                  dataPoints: [
+                    [
+                      const FlSpot(0, 0),
+                      const FlSpot(2, 3),
+                      const FlSpot(5, 10),
+                      const FlSpot(10, 10),
+                      const FlSpot(12, -45),
+                    ],
+                    [
+                      const FlSpot(1, 4),
+                      const FlSpot(75, 23),
+                      const FlSpot(19, -20),
+                    ],
+                    [
+                      const FlSpot(56, 2),
+                      const FlSpot(98, 101),
+                      const FlSpot(109, 150),
+                    ]
+                  ],
                 )
             ),
           ],

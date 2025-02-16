@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class SimpleOscilloscope extends StatefulWidget {
-  final OscilloscopeAxisChartData oscilloscopeAxisChartData;
+  final OscilloscopeChartData oscilloscopeChartData;
+  final List<List<FlSpot>> dataPoints;
 
   const SimpleOscilloscope({
     super.key,
-    required this.oscilloscopeAxisChartData,
+    required this.oscilloscopeChartData,
+    required this.dataPoints
   });
 
   @override
@@ -28,7 +30,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   @override
   void initState() {
     super.initState();
-    _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
+    _thresholdValue = widget.oscilloscopeChartData.threshold;
     _updateThresholdProgressbarValue(_thresholdValue);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateBottomPadding();
@@ -44,12 +46,12 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   void didUpdateWidget(covariant SimpleOscilloscope oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
-        widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
-        _thresholdValue != widget.oscilloscopeAxisChartData.threshold) {
+    if (widget.oscilloscopeChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeChartData.verticalAxisValuePerDivision ||
+        widget.oscilloscopeChartData.numberOfDivisions != oldWidget.oscilloscopeChartData.numberOfDivisions ||
+        _thresholdValue != widget.oscilloscopeChartData.threshold) {
 
       setState(() {
-        _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
+        _thresholdValue = widget.oscilloscopeChartData.threshold;
         _thresholdProgressbarValue = _thresholdValue;
         _clampThresholdProgressbarValue();
       });
@@ -58,8 +60,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
 
   void _clampThresholdProgressbarValue() {
     _thresholdProgressbarValue = _thresholdProgressbarValue.clamp(
-      -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-      widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+      -widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
+      widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
     );
   }
 
@@ -101,16 +103,16 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                       chartRendererKey: _chartAreaRenderKey,
                       LineChartData(
                         lineTouchData: LineTouchData(
-                          enabled: widget.oscilloscopeAxisChartData.enableTooltip,
+                          enabled: widget.oscilloscopeChartData.enableTooltip,
                           getTouchLineStart: (barData, spotIndex) => 0,
                           getTouchLineEnd: (barData, spotIndex) => 0,
                         ),
-                        lineBarsData: widget.oscilloscopeAxisChartData.dataPoints.isNotEmpty ? widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) =>
+                        lineBarsData: widget.dataPoints.isNotEmpty ? widget.dataPoints.asMap().entries.map((entry) =>
                             LineChartBarData(
                               spots: entry.value,
                               isCurved: false,
                               preventCurveOverShooting: true,
-                              color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
+                              color: widget.oscilloscopeChartData.colors[entry.key % widget.oscilloscopeChartData.colors.length],
                               dotData: const FlDotData(
                                 show: false,  // Disable dots to improve performance
                               ),
@@ -119,30 +121,30 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                         gridData: FlGridData(
                           drawHorizontalLine: true,
                           drawVerticalLine: true,
-                          horizontalInterval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
-                          verticalInterval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                          horizontalInterval: widget.oscilloscopeChartData.verticalAxisValuePerDivision,
+                          verticalInterval: widget.oscilloscopeChartData.horizontalAxisValuePerDivision,
                           getDrawingHorizontalLine: (value) {
-                            return value % widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision
+                            return value % widget.oscilloscopeChartData.verticalAxisValuePerDivision.abs() < widget.oscilloscopeChartData.verticalAxisValuePerDivision
                                 ? defaultGridLine(value)
                                 : const FlLine(color: Colors.transparent);
                           },
                           getDrawingVerticalLine: (value) {
-                            return value % widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision.abs() < widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision
+                            return value % widget.oscilloscopeChartData.horizontalAxisValuePerDivision.abs() < widget.oscilloscopeChartData.horizontalAxisValuePerDivision
                                 ? defaultGridLine(value)
                                 : const FlLine(color: Colors.transparent);
                           },
                         ),
                         minX: 0,
-                        maxX: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
-                        minY: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                        maxY: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        maxX: widget.oscilloscopeChartData.horizontalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions * 2,
+                        minY: -widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
+                        maxY: widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions,
                         clipData: const FlClipData.all(),
                         titlesData: FlTitlesData(
                           leftTitles: AxisTitles(
-                            axisNameWidget: Text(widget.oscilloscopeAxisChartData.verticalAxisLabel),
+                            axisNameWidget: Text(widget.oscilloscopeChartData.verticalAxisLabel),
                             axisNameSize: 18,
                             sideTitles: SideTitles(
-                              interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                              interval: widget.oscilloscopeChartData.verticalAxisValuePerDivision,
                               showTitles: true,
                               reservedSize: 85,
                               getTitlesWidget: (value, meta) {
@@ -150,7 +152,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                                   child: SideTitleWidget(
                                     meta: meta,
                                     child: Text(
-                                      '${meta.formattedValue} ${widget.oscilloscopeAxisChartData.verticalAxisUnit}',
+                                      '${meta.formattedValue} ${widget.oscilloscopeChartData.verticalAxisUnit}',
                                     ),
                                   ),
                                 );
@@ -158,10 +160,10 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             ),
                           ),
                           bottomTitles: AxisTitles(
-                            axisNameWidget: Text(widget.oscilloscopeAxisChartData.horizontalAxisLabel),
+                            axisNameWidget: Text(widget.oscilloscopeChartData.horizontalAxisLabel),
                             axisNameSize: 18,
                             sideTitles: SideTitles(
-                              interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                              interval: widget.oscilloscopeChartData.horizontalAxisValuePerDivision,
                               showTitles: true,
                               reservedSize: 45,
                               getTitlesWidget: (value, meta) {
@@ -179,7 +181,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                                         Expanded(
                                           child: FittedBox(
                                             fit: BoxFit.scaleDown,
-                                            child: Text(widget.oscilloscopeAxisChartData.horizontalAxisUnit),
+                                            child: Text(widget.oscilloscopeChartData.horizontalAxisUnit),
                                           ),
                                         ),
                                       ],
@@ -200,7 +202,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                             ),
                           ),
                         ),
-                        extraLinesData: widget.oscilloscopeAxisChartData.isThresholdVisible ?
+                        extraLinesData: widget.oscilloscopeChartData.isThresholdVisible ?
                         ExtraLinesData(
                           horizontalLines: [
                             HorizontalLine(
@@ -209,8 +211,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                               strokeWidth: 2,
                               dashArray: const [5, 5],
                             ),
-                            if (widget.oscilloscopeAxisChartData.extraPlotLines != null)
-                              ...widget.oscilloscopeAxisChartData.extraPlotLines!.entries.map((entry) {
+                            if (widget.oscilloscopeChartData.extraPlotLines != null)
+                              ...widget.oscilloscopeChartData.extraPlotLines!.entries.map((entry) {
                                 return HorizontalLine(
                                     y: entry.key,
                                     color: entry.value,
@@ -226,15 +228,15 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                 ),
                 const SizedBox(width: 16),
                 ThresholdSlider(
-                  min: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
-                      widget.oscilloscopeAxisChartData.numberOfDivisions,
-                  max: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
-                      widget.oscilloscopeAxisChartData.numberOfDivisions,
+                  min: -widget.oscilloscopeChartData.verticalAxisValuePerDivision *
+                      widget.oscilloscopeChartData.numberOfDivisions,
+                  max: widget.oscilloscopeChartData.verticalAxisValuePerDivision *
+                      widget.oscilloscopeChartData.numberOfDivisions,
                   value: _thresholdProgressbarValue,
                   sliderBottomPadding: _sliderBottomPadding,
-                  isSliderActive: widget.oscilloscopeAxisChartData.isThresholdSliderActive,
-                  isThresholdVisible: widget.oscilloscopeAxisChartData.isThresholdVisible,
-                  stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
+                  isSliderActive: widget.oscilloscopeChartData.isThresholdSliderActive,
+                  isThresholdVisible: widget.oscilloscopeChartData.isThresholdVisible,
+                  stepSize: widget.oscilloscopeChartData.thresholdDragStepSize,
                   thresholdValue: _thresholdValue,
                   onDoubleTap: () {
                     _showThresholdDialog(context);
@@ -249,7 +251,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                     setState(() {
                       _updateThresholdProgressbarValue(value);
                     });
-                    widget.oscilloscopeAxisChartData
+                    widget.oscilloscopeChartData
                         .onThresholdValueChanged
                         ?.call(double.parse(value.toStringAsFixed(2)));
                   },
@@ -268,7 +270,7 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
       builder: (BuildContext context) {
         double newValue = _thresholdValue;
         return AlertDialog(
-          title: Text(widget.oscilloscopeAxisChartData.thresholdLabel),
+          title: Text(widget.oscilloscopeChartData.thresholdLabel),
           content: TextFormField(
             initialValue: _thresholdValue.toStringAsFixed(2),
             onChanged: (value) {
@@ -282,25 +284,25 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
               setState(() {
                 _thresholdValue = newValue;
                 _updateThresholdProgressbarValue(newValue);
-                widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
+                widget.oscilloscopeChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
               });
               Navigator.of(context).pop();
             },
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
+              child: Text(widget.oscilloscopeChartData.updateButtonLabel),
               onPressed: () {
                 setState(() {
                   _thresholdValue = newValue;
                   _updateThresholdProgressbarValue(newValue);
-                  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
+                  widget.oscilloscopeChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
                 });
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text(widget.oscilloscopeAxisChartData.cancelButtonLabel),
+              child: Text(widget.oscilloscopeChartData.cancelButtonLabel),
               onPressed: () {
                 Navigator.of(context).pop();
               },

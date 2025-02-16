@@ -1,8 +1,6 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class OscilloscopeAxisChartData {
-  List<List<FlSpot>> dataPoints;
+class OscilloscopeChartData {
   final int numberOfDivisions;
   final String horizontalAxisLabel;
   final String verticalAxisLabel;
@@ -22,8 +20,7 @@ class OscilloscopeAxisChartData {
   final Map<double, Color>? extraPlotLines;
   final bool enableTooltip;
 
-  OscilloscopeAxisChartData({
-    required this.dataPoints,
+  OscilloscopeChartData({
     this.numberOfDivisions = 5,
     required this.horizontalAxisLabel,
     required this.verticalAxisLabel,
