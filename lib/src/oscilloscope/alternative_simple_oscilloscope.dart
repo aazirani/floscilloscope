@@ -25,6 +25,7 @@ class AlternativeSimpleOscilloscope extends StatefulWidget {
 class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscilloscope> {
 
   late List<LineSeries<FlSpot, double>> _series;
+  List<ChartSeriesController>? _seriesControllers;
 
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
@@ -49,7 +50,7 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   @override
   void initState() {
     super.initState();
-    _updateSeries(widget.dataPointsNotifier.value); // Initialize series with initial data
+    _createTheSeries(widget.dataPointsNotifier.value); // Initialize series with initial data
     widget.dataPointsNotifier.addListener(_onDataPointsChanged);
     _thresholdProgressbarMaximum = widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions;
     _thresholdProgressbarMinimum = -widget.oscilloscopeChartData.verticalAxisValuePerDivision * widget.oscilloscopeChartData.numberOfDivisions;
@@ -67,14 +68,15 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   }
 
   void _onDataPointsChanged() {
-    setState(() {
-      _updateSeries(widget.dataPointsNotifier.value);
-    });
+    _updateSeries(widget.dataPointsNotifier.value);
   }
 
-  void _updateSeries(List<List<FlSpot>> dataPoints) {
+  void _createTheSeries(List<List<FlSpot>> dataPoints) {
     _series = dataPoints.asMap().entries.map((entry) {
       return LineSeries<FlSpot, double>(
+        onRendererCreated: (controller) {
+          _seriesControllers?[entry.key] = controller;
+        },
         dataLabelSettings: const DataLabelSettings(isVisible: false),
         enableTooltip: widget.oscilloscopeChartData.enableTooltip,
         dataSource: entry.value,
@@ -84,6 +86,42 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         color: widget.oscilloscopeChartData.colors[entry.key % widget.oscilloscopeChartData.colors.length],
       );
     }).toList();
+  }
+
+  void _updateSeries(List<List<FlSpot>> dataPoints) {
+    dataPoints.asMap().forEach((index, newFlSpots) {
+      final currentDataSource = _series[index].dataSource;
+
+      if (currentDataSource != null) {
+        // Determine the number of points to replace
+        final minLength = currentDataSource.length < newFlSpots.length ? currentDataSource.length : newFlSpots.length;
+
+        // Replace existing points with new points up to the minimum length
+        for (int i = 0; i < minLength; i++) {
+          currentDataSource[i] = newFlSpots[i];
+        }
+
+        // If new points are longer, add the additional points
+        if (newFlSpots.length > currentDataSource.length) {
+          currentDataSource.addAll(newFlSpots.sublist(currentDataSource.length));
+        }
+        // If new points are shorter, remove the extra points
+        else if (newFlSpots.length < currentDataSource.length) {
+          currentDataSource.removeRange(newFlSpots.length, currentDataSource.length);
+        }
+
+        // Notify the chart to update the series' data source
+        _seriesControllers?[index].updateDataSource(
+          updatedDataIndexes: List.generate(minLength, (i) => i),
+          addedDataIndexes: newFlSpots.length > currentDataSource.length
+              ? List.generate(newFlSpots.length - currentDataSource.length, (i) => currentDataSource.length + i)
+              : null,
+          removedDataIndexes: newFlSpots.length < currentDataSource.length
+              ? List.generate(currentDataSource.length - newFlSpots.length, (i) => newFlSpots.length + i)
+              : null,
+        );
+      }
+    });
   }
 
   @override
