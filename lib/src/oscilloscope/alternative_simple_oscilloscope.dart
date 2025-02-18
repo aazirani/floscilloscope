@@ -93,40 +93,48 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   }
 
   void _updateSeries(List<List<FlSpot>> dataPoints) {
-    dataPoints.asMap().forEach((index, newFlSpots) {
+    for (int index = 0; index < dataPoints.length; index++) {
       if (index < _series.length) {
         final currentDataSource = _series[index].dataSource;
         if (currentDataSource != null) {
+
+
           // Save old length to compute added/removed indexes.
           final int oldLength = currentDataSource.length;
-          final int minLength = oldLength < newFlSpots.length ? oldLength : newFlSpots.length;
+          final int minLength = oldLength < dataPoints[index].length ? oldLength : dataPoints[index].length;
 
           // Update common indices.
           for (int i = 0; i < minLength; i++) {
-            currentDataSource[i] = newFlSpots[i];
+            currentDataSource[i] = dataPoints[index][i];
           }
 
           // If new data has additional points, add them.
-          if (newFlSpots.length > oldLength) {
-            currentDataSource.addAll(newFlSpots.sublist(oldLength));
+          if (dataPoints[index].length > oldLength) {
+            currentDataSource.addAll(dataPoints[index].sublist(oldLength));
           }
           // Or if new data is shorter, remove extra points.
-          else if (newFlSpots.length < oldLength) {
-            currentDataSource.removeRange(newFlSpots.length, oldLength);
+          else if (dataPoints[index].length < oldLength) {
+            currentDataSource.removeRange(dataPoints[index].length, oldLength);
           }
 
           // Now notify the chart.
           final controller = _seriesControllers?[index];
           if (controller != null) {
-            controller.updateDataSource(
-              updatedDataIndexes: List.generate(minLength, (i) => i),
-              addedDataIndexes: newFlSpots.length > oldLength
-                  ? List.generate(newFlSpots.length - oldLength, (i) => oldLength + i)
-                  : null,
-              removedDataIndexes: newFlSpots.length < oldLength
-                  ? List.generate(oldLength - newFlSpots.length, (i) => newFlSpots.length + i)
-                  : null,
-            );
+            try {
+              controller.updateDataSource(
+                updatedDataIndexes: List.generate(minLength, (i) => i),
+                addedDataIndexes: dataPoints[index].length > oldLength
+                    ? List.generate(dataPoints[index].length - oldLength, (i) => oldLength + i)
+                    : null,
+                removedDataIndexes: dataPoints[index].length < oldLength
+                    ? List.generate(oldLength - dataPoints[index].length, (i) => dataPoints[index].length + i)
+                    : null,
+              );
+            } catch (e) {
+              debugPrint("index was " + index.toString());
+              debugPrint("size of _seriesControllers was " + _seriesControllers!.length.toString());
+              debugPrint("size of _series was " + _series.length.toString());
+            }
           }
         }
       } else {
@@ -134,19 +142,20 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
         _createTheSeries(dataPoints);
         debugPrint("Series at index $index is not initialized or out of range.");
       }
-    });
+    }
   }
-
 
 
   @override
   void didUpdateWidget(covariant AlternativeSimpleOscilloscope oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.oscilloscopeChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeChartData.verticalAxisValuePerDivision ||
-        widget.oscilloscopeChartData.numberOfDivisions != oldWidget.oscilloscopeChartData.numberOfDivisions ||
-        _thresholdValue != widget.oscilloscopeChartData.threshold) {
-
+    if (
+    widget.oscilloscopeChartData.verticalAxisValuePerDivision !=
+        oldWidget.oscilloscopeChartData.verticalAxisValuePerDivision ||
+        widget.oscilloscopeChartData.numberOfDivisions !=
+            oldWidget.oscilloscopeChartData.numberOfDivisions ||
+        _thresholdValue != widget.oscilloscopeChartData.threshold
+    ) {
       setState(() {
         _thresholdValue = widget.oscilloscopeChartData.threshold;
         _thresholdProgressbarValue = _thresholdValue;
