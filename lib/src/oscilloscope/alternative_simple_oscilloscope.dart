@@ -8,26 +8,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+/// A widget that displays an alternative simple oscilloscope using Syncfusion charts.
 class AlternativeSimpleOscilloscope extends StatefulWidget {
+  /// The data for the oscilloscope axis chart.
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
+  /// Creates an [AlternativeSimpleOscilloscope] widget.
   const AlternativeSimpleOscilloscope({
     super.key,
     required this.oscilloscopeAxisChartData,
   });
 
   @override
-  State<AlternativeSimpleOscilloscope> createState() => _AlternativeSimpleOscilloscopeState();
+  State<AlternativeSimpleOscilloscope> createState() =>
+      _AlternativeSimpleOscilloscopeState();
 }
 
-class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscilloscope> {
-
+class _AlternativeSimpleOscilloscopeState
+    extends State<AlternativeSimpleOscilloscope> {
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryXAxisRenderKey = GlobalKey<_AlternativeSimpleOscilloscopeState>();
-  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryYAxisRenderKey = GlobalKey<_AlternativeSimpleOscilloscopeState>();
+  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryXAxisRenderKey =
+      GlobalKey<_AlternativeSimpleOscilloscopeState>();
+  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryYAxisRenderKey =
+      GlobalKey<_AlternativeSimpleOscilloscopeState>();
 
   late double _thresholdProgressbarMaximum;
   late double _thresholdProgressbarMinimum;
@@ -39,14 +45,17 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   final _zoomPanBehavior = ZoomPanBehavior(
       enablePanning: true,
       enableMouseWheelZooming: true,
-      enableSelectionZooming: true
-  );
+      enableSelectionZooming: true);
 
   @override
   void initState() {
     super.initState();
-    _thresholdProgressbarMaximum = widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
-    _thresholdProgressbarMinimum = -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
+    _thresholdProgressbarMaximum =
+        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+            widget.oscilloscopeAxisChartData.numberOfDivisions;
+    _thresholdProgressbarMinimum =
+        -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+            widget.oscilloscopeAxisChartData.numberOfDivisions;
     _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
     _updateThresholdProgressbarValue(_thresholdValue);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -63,10 +72,11 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   void didUpdateWidget(covariant AlternativeSimpleOscilloscope oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision != oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
-        widget.oscilloscopeAxisChartData.numberOfDivisions != oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
+    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
+            oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
+        widget.oscilloscopeAxisChartData.numberOfDivisions !=
+            oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
         _thresholdValue != widget.oscilloscopeAxisChartData.threshold) {
-
       setState(() {
         _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
         _thresholdProgressbarValue = _thresholdValue;
@@ -83,8 +93,10 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
   }
 
   void _calculateBottomPadding() {
-    final primaryXAxisRenderBox = _primaryXAxisRenderKey.currentContext?.findRenderObject() as RenderBox?;
-    final primaryYAxisRenderBox = _primaryYAxisRenderKey.currentContext?.findRenderObject() as RenderBox?;
+    final primaryXAxisRenderBox =
+        _primaryXAxisRenderKey.currentContext?.findRenderObject() as RenderBox?;
+    final primaryYAxisRenderBox =
+        _primaryYAxisRenderKey.currentContext?.findRenderObject() as RenderBox?;
     if (primaryYAxisRenderBox != null && primaryXAxisRenderBox != null) {
       setState(() {
         _sliderBottomPadding = primaryXAxisRenderBox.size.height;
@@ -100,13 +112,15 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
     _clampThresholdProgressbarValue();
   }
 
-  double calculateZoomedMin(double currentMin, double currentMax, double zoomFactor, double zoomPosition) {
+  double calculateZoomedMin(double currentMin, double currentMax,
+      double zoomFactor, double zoomPosition) {
     double range = currentMax - currentMin;
     double zoomedMin = currentMin + range * zoomPosition;
     return zoomedMin;
   }
 
-  double calculateZoomedMax(double zoomedMin, double currentMin, double currentMax, double zoomFactor) {
+  double calculateZoomedMax(double zoomedMin, double currentMin,
+      double currentMax, double zoomFactor) {
     double range = currentMax - currentMin;
     double zoomedRange = range * zoomFactor;
     return zoomedMin + zoomedRange;
@@ -138,7 +152,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                       },
                       onChartTouchInteractionUp: (tapArgs) {
                         // If the second tap is detected, increment the pointer count
-                        if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
+                        if (_doubleTapTimer != null &&
+                            _doubleTapTimer!.isActive) {
                           _pointerCount++;
                         }
                         // If the pointer count is 2, then the double tap is detected
@@ -154,7 +169,7 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                       },
                       zoomPanBehavior: _zoomPanBehavior,
                       onZoomEnd: (zoom) {
-                        if(zoom.axis?.isVertical ?? false){
+                        if (zoom.axis?.isVertical ?? false) {
                           _zoomFactor = zoom.currentZoomFactor;
                           _zoomPosition = zoom.currentZoomPosition;
                           _handleZoom();
@@ -164,74 +179,95 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                       enableAxisAnimation: false,
                       primaryXAxis: NumericAxis(
                         title: AxisTitle(
-                            text: widget.oscilloscopeAxisChartData.horizontalAxisLabel
-                        ),
-                        labelFormat: "{value}${widget.oscilloscopeAxisChartData.horizontalAxisUnit}",
+                            text: widget
+                                .oscilloscopeAxisChartData.horizontalAxisLabel),
+                        labelFormat:
+                            "{value}${widget.oscilloscopeAxisChartData.horizontalAxisUnit}",
                         key: _primaryXAxisRenderKey,
                         minimum: 0,
-                        maximum: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions * 2,
+                        maximum: widget.oscilloscopeAxisChartData
+                                .horizontalAxisValuePerDivision *
+                            widget.oscilloscopeAxisChartData.numberOfDivisions *
+                            2,
                         edgeLabelPlacement: EdgeLabelPlacement.shift,
                         minorGridLines: const MinorGridLines(width: 0),
-                        interval: widget.oscilloscopeAxisChartData.horizontalAxisValuePerDivision,
+                        interval: widget.oscilloscopeAxisChartData
+                            .horizontalAxisValuePerDivision,
                       ),
                       primaryYAxis: NumericAxis(
                         title: AxisTitle(
-                            text: widget.oscilloscopeAxisChartData.verticalAxisLabel
-                        ),
-                        labelFormat: "{value}${widget.oscilloscopeAxisChartData.verticalAxisUnit}",
+                            text: widget
+                                .oscilloscopeAxisChartData.verticalAxisLabel),
+                        labelFormat:
+                            "{value}${widget.oscilloscopeAxisChartData.verticalAxisUnit}",
                         plotBands: [
                           PlotBand(
                               start: _thresholdProgressbarValue,
                               end: _thresholdProgressbarValue,
-                              borderColor: Theme.of(context).primaryColor, // Line color
+                              borderColor:
+                                  Theme.of(context).primaryColor, // Line color
                               borderWidth: 2,
                               dashArray: const <double>[5, 5],
-                              shouldRenderAboveSeries: true
-                          ),
-                          if (widget.oscilloscopeAxisChartData.extraPlotLines != null)
-                            ...widget.oscilloscopeAxisChartData.extraPlotLines!.entries.map((entry) {
+                              shouldRenderAboveSeries: true),
+                          if (widget.oscilloscopeAxisChartData.extraPlotLines !=
+                              null)
+                            ...widget.oscilloscopeAxisChartData.extraPlotLines!
+                                .entries
+                                .map((entry) {
                               return PlotBand(
-                                start: entry.key,
-                                end: entry.key,
-                                borderColor: entry.value,
-                                borderWidth: 2,
-                                dashArray: const <double>[5, 5],
-                                shouldRenderAboveSeries: true
-                              );
+                                  start: entry.key,
+                                  end: entry.key,
+                                  borderColor: entry.value,
+                                  borderWidth: 2,
+                                  dashArray: const <double>[5, 5],
+                                  shouldRenderAboveSeries: true);
                             })
                         ],
                         key: _primaryYAxisRenderKey,
-                        minimum: -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
-                        maximum: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        minimum: -widget.oscilloscopeAxisChartData
+                                .verticalAxisValuePerDivision *
+                            widget.oscilloscopeAxisChartData.numberOfDivisions,
+                        maximum: widget.oscilloscopeAxisChartData
+                                .verticalAxisValuePerDivision *
+                            widget.oscilloscopeAxisChartData.numberOfDivisions,
                         edgeLabelPlacement: EdgeLabelPlacement.shift,
                         minorGridLines: const MinorGridLines(width: 0),
-                        interval: widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision,
+                        interval: widget.oscilloscopeAxisChartData
+                            .verticalAxisValuePerDivision,
                       ),
                       series: [
-                        ...widget.oscilloscopeAxisChartData.dataPoints.asMap().entries.map((entry) {
+                        ...widget.oscilloscopeAxisChartData.dataPoints
+                            .asMap()
+                            .entries
+                            .map((entry) {
                           return LineSeries<FlSpot, double>(
-                            dataLabelSettings: const DataLabelSettings(isVisible: false),
-                            enableTooltip: widget.oscilloscopeAxisChartData.enableTooltip,
+                            dataLabelSettings:
+                                const DataLabelSettings(isVisible: false),
+                            enableTooltip:
+                                widget.oscilloscopeAxisChartData.enableTooltip,
                             dataSource: entry.value,
                             xValueMapper: (FlSpot data, _) => data.x,
                             yValueMapper: (FlSpot data, _) => data.y,
                             animationDuration: 0,
-                            color: widget.oscilloscopeAxisChartData.colors[entry.key % widget.oscilloscopeAxisChartData.colors.length],
+                            color: widget.oscilloscopeAxisChartData.colors[entry
+                                    .key %
+                                widget.oscilloscopeAxisChartData.colors.length],
                           );
                         })
-
                       ],
-                    )
-                ),
+                    )),
                 const SizedBox(width: 16),
                 ThresholdSlider(
                   min: _thresholdProgressbarMinimum,
                   max: _thresholdProgressbarMaximum,
                   value: _thresholdProgressbarValue,
                   sliderBottomPadding: _sliderBottomPadding,
-                  isSliderActive: widget.oscilloscopeAxisChartData.isThresholdSliderActive,
-                  isThresholdVisible: widget.oscilloscopeAxisChartData.isThresholdVisible,
-                  stepSize: widget.oscilloscopeAxisChartData.thresholdDragStepSize,
+                  isSliderActive:
+                      widget.oscilloscopeAxisChartData.isThresholdSliderActive,
+                  isThresholdVisible:
+                      widget.oscilloscopeAxisChartData.isThresholdVisible,
+                  stepSize:
+                      widget.oscilloscopeAxisChartData.thresholdDragStepSize,
                   thresholdValue: _thresholdValue,
                   onDoubleTap: () {
                     _showThresholdDialog(context);
@@ -246,12 +282,10 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                     setState(() {
                       _updateThresholdProgressbarValue(value);
                     });
-                    widget.oscilloscopeAxisChartData
-                        .onThresholdValueChanged
+                    widget.oscilloscopeAxisChartData.onThresholdValueChanged
                         ?.call(double.parse(value.toStringAsFixed(2)));
                   },
                 ),
-
               ],
             ),
           ),
@@ -271,11 +305,17 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
 
   void _handleZoom() {
     // Calculate the zoomed min and max for the Y-axis
-    double currentMin = -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
-    double currentMax = widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision * widget.oscilloscopeAxisChartData.numberOfDivisions;
+    double currentMin =
+        -widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+            widget.oscilloscopeAxisChartData.numberOfDivisions;
+    double currentMax =
+        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
+            widget.oscilloscopeAxisChartData.numberOfDivisions;
 
-    double zoomedMin = calculateZoomedMin(currentMin, currentMax, _zoomFactor, _zoomPosition);
-    double zoomedMax = calculateZoomedMax(zoomedMin, currentMin, currentMax, _zoomFactor);
+    double zoomedMin =
+        calculateZoomedMin(currentMin, currentMax, _zoomFactor, _zoomPosition);
+    double zoomedMax =
+        calculateZoomedMax(zoomedMin, currentMin, currentMax, _zoomFactor);
 
     setState(() {
       _thresholdProgressbarMaximum = zoomedMax;
@@ -305,7 +345,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
               setState(() {
                 _thresholdValue = newValue;
                 _updateThresholdProgressbarValue(newValue);
-                widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
+                widget.oscilloscopeAxisChartData.onThresholdValueChanged
+                    ?.call(double.parse(newValue.toStringAsFixed(2)));
               });
               Navigator.of(context).pop();
             },
@@ -317,7 +358,8 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
                 setState(() {
                   _thresholdValue = newValue;
                   _updateThresholdProgressbarValue(newValue);
-                  widget.oscilloscopeAxisChartData.onThresholdValueChanged?.call(double.parse(newValue.toStringAsFixed(2)));
+                  widget.oscilloscopeAxisChartData.onThresholdValueChanged
+                      ?.call(double.parse(newValue.toStringAsFixed(2)));
                 });
                 Navigator.of(context).pop();
               },
@@ -333,5 +375,4 @@ class _AlternativeSimpleOscilloscopeState extends State<AlternativeSimpleOscillo
       },
     );
   }
-
 }

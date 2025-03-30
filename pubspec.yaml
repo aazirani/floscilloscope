@@ -1,6 +1,6 @@
 name: floscilloscope
-description: "A customizable oscilloscope widget for Flutter"
-version: 1.0.0
+description: "A customizable oscilloscope widget"
+version: 1.0.1
 homepage: https://github.com/aazirani/floscilloscope
 repository: https://github.com/aazirani/floscilloscope
 
@@ -10,12 +10,12 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  syncfusion_flutter_core: ^28.2.5
-  syncfusion_flutter_sliders: ^28.2.5
+  syncfusion_flutter_core: ^29.1.33
+  syncfusion_flutter_sliders: ^29.1.33
   fl_chart: ^0.70.2
   flutter:
     sdk: flutter
-  syncfusion_flutter_charts: ^28.2.5+1
+  syncfusion_flutter_charts: ^29.1.33
 
 dev_dependencies:
   flutter_test:
