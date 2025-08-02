@@ -1,4 +1,4 @@
-library floscilloscope;
+library;
 
 /// A customizable oscilloscope widget
 export 'src/oscilloscope/alternative_simple_oscilloscope.dart';
