@@ -1,6 +1,6 @@
 name: floscilloscope
 description: "An oscilloscope widget featuring dynamic chart rendering, threshold manipulation, zoom/pan, customizable axes, multi-data series, and interactive threshold sliders."
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/aazirani/floscilloscope
 repository: https://github.com/aazirani/floscilloscope
 

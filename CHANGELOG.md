@@ -18,3 +18,7 @@
 
 * Changed the description of the package.
 * Added the changelog text for more points.
+
+## 1.0.3
+
+* Updated the dependencies.
