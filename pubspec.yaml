@@ -9,6 +9,14 @@ environment:
   sdk: '>=3.3.4 <4.0.0'
   flutter: ">=1.17.0"
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
 dependencies:
   syncfusion_flutter_core: ^30.1.42
   syncfusion_flutter_sliders: ^30.1.42

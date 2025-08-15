@@ -8,12 +8,66 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-/// A widget that displays an alternative simple oscilloscope using Syncfusion charts.
+/// An advanced oscilloscope widget with zoom/pan capabilities using Syncfusion charts.
+///
+/// This widget provides a feature-rich oscilloscope visualization with advanced
+/// interaction capabilities including zooming, panning, and selection. It uses
+/// the Syncfusion Flutter Charts library, offering professional-grade charting
+/// capabilities suitable for complex data analysis and technical applications.
+///
+/// Advanced Features:
+/// - Interactive zoom and pan gestures for detailed data exploration
+/// - Mouse wheel zooming support for desktop applications
+/// - Selection zooming for precise region analysis
+/// - Professional-grade chart rendering with smooth performance
+/// - Multi-touch gesture support for mobile devices
+/// - All standard oscilloscope features from [SimpleOscilloscope]
+///
+/// Standard Features:
+/// - Multiple data series support with customizable colors
+/// - Interactive threshold line with drag-to-adjust capability
+/// - Configurable axes with labels and units
+/// - Grid divisions for easier reading
+/// - Threshold slider for precise value adjustment
+/// - Extra plot lines for additional reference markers
+/// - Tooltip support for data point inspection
+///
+/// Example usage:
+/// ```dart
+/// AlternativeSimpleOscilloscope(
+///   oscilloscopeAxisChartData: OscilloscopeAxisChartData(
+///     dataPoints: [
+///       [OscilloscopePoint(0, 0), OscilloscopePoint(1, 1)],
+///       [OscilloscopePoint(0, 1), OscilloscopePoint(1, 2)],
+///     ],
+///     horizontalAxisLabel: 'Time',
+///     verticalAxisLabel: 'Voltage',
+///     horizontalAxisUnit: 'ms',
+///     verticalAxisUnit: 'V',
+///     threshold: 1.5,
+///     enableTooltip: true,
+///     colors: [Colors.blue, Colors.red],
+///   ),
+/// )
+/// ```
+///
+/// See also:
+/// * [SimpleOscilloscope] for a lightweight alternative without zoom/pan
+/// * [OscilloscopeAxisChartData] for configuration options
+/// * [ThresholdSlider] for threshold manipulation controls
 class AlternativeSimpleOscilloscope extends StatefulWidget {
-  /// The data for the oscilloscope axis chart.
+  /// The configuration and data for the oscilloscope chart.
+  ///
+  /// This contains all the necessary information to render the advanced
+  /// oscilloscope, including data points, axis configuration, threshold
+  /// settings, visual customization options, and interaction behaviors.
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
   /// Creates an [AlternativeSimpleOscilloscope] widget.
+  ///
+  /// The [oscilloscopeAxisChartData] parameter is required and contains
+  /// all the configuration and data needed to render the advanced
+  /// oscilloscope chart with zoom/pan capabilities.
   const AlternativeSimpleOscilloscope({
     super.key,
     required this.oscilloscopeAxisChartData,

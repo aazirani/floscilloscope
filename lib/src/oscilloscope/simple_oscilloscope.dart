@@ -5,11 +5,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// A simple oscilloscope widget that displays data using the `fl_chart` package.
+///
+/// This widget provides a basic oscilloscope visualization with essential features
+/// including line charts, threshold indicators, and interactive threshold sliders.
+/// It uses the fl_chart library for rendering, making it lightweight and efficient
+/// for most oscilloscope visualization needs.
+///
+/// Features:
+/// - Multiple data series support with customizable colors
+/// - Interactive threshold line with drag-to-adjust capability
+/// - Configurable axes with labels and units
+/// - Grid divisions for easier reading
+/// - Threshold slider for precise value adjustment
+/// - Extra plot lines for additional reference markers
+///
+/// Example usage:
+/// ```dart
+/// SimpleOscilloscope(
+///   oscilloscopeAxisChartData: OscilloscopeAxisChartData(
+///     dataPoints: [
+///       [OscilloscopePoint(0, 0), OscilloscopePoint(1, 1)],
+///     ],
+///     horizontalAxisLabel: 'Time',
+///     verticalAxisLabel: 'Voltage',
+///     horizontalAxisUnit: 's',
+///     verticalAxisUnit: 'V',
+///     threshold: 0.5,
+///   ),
+/// )
+/// ```
+///
+/// See also:
+/// * [AlternativeSimpleOscilloscope] for advanced features like zoom/pan
+/// * [OscilloscopeAxisChartData] for configuration options
 class SimpleOscilloscope extends StatefulWidget {
-  /// The data for the oscilloscope axis chart.
+  /// The configuration and data for the oscilloscope chart.
+  ///
+  /// This contains all the necessary information to render the oscilloscope,
+  /// including data points, axis configuration, threshold settings, and
+  /// visual customization options.
   final OscilloscopeAxisChartData oscilloscopeAxisChartData;
 
   /// Creates a new instance of [SimpleOscilloscope].
+  ///
+  /// The [oscilloscopeAxisChartData] parameter is required and contains
+  /// all the configuration and data needed to render the oscilloscope chart.
   const SimpleOscilloscope({
     super.key,
     required this.oscilloscopeAxisChartData,
