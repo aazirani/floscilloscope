@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:floscilloscope/floscilloscope.dart';
 import 'package:flutter/material.dart';
 
@@ -40,21 +39,21 @@ class _MyHomePageState extends State<MyHomePage> {
           thresholdDragStepSize: 2.0,
           dataPoints: [
             [
-              const FlSpot(0, 0),
-              const FlSpot(2, 3),
-              const FlSpot(5, 10),
-              const FlSpot(10, 10),
-              const FlSpot(12, -45),
+              const OscilloscopePoint(0, 0),
+              const OscilloscopePoint(2, 3),
+              const OscilloscopePoint(5, 10),
+              const OscilloscopePoint(10, 10),
+              const OscilloscopePoint(12, -45),
             ],
             [
-              const FlSpot(1, 4),
-              const FlSpot(75, 23),
-              const FlSpot(19, -20),
+              const OscilloscopePoint(1, 4),
+              const OscilloscopePoint(75, 23),
+              const OscilloscopePoint(19, -20),
             ],
             [
-              const FlSpot(56, 2),
-              const FlSpot(98, 101),
-              const FlSpot(109, 150),
+              const OscilloscopePoint(56, 2),
+              const OscilloscopePoint(98, 101),
+              const OscilloscopePoint(109, 150),
             ]
           ],
           numberOfDivisions: 5,
@@ -77,10 +76,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(
+            Flexible(
+                flex: 1,
+                child: SimpleOscilloscope(
+                  oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
+                )),
+            Flexible(
+              flex: 1,
                 child: AlternativeSimpleOscilloscope(
               oscilloscopeAxisChartData: _oscilloscopeAxisChartData,
-            )),
+            ))
           ],
         ),
       ),

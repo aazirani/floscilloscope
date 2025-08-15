@@ -22,3 +22,7 @@
 ## 1.0.3
 
 * Updated the dependencies.
+
+## 1.0.4
+
+* The alternative oscilloscope does not use FlSpot from fl_chart anymore, but a custom OscilloscopePoint class.

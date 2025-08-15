@@ -1,10 +1,10 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'package:floscilloscope/src/oscilloscope/oscilloscope_point.dart';
 import 'package:flutter/material.dart';
 
 /// A class representing the data for an oscilloscope axis chart.
 class OscilloscopeAxisChartData {
   /// A list of data points for the chart.
-  List<List<FlSpot>> dataPoints;
+  List<List<OscilloscopePoint>> dataPoints;
 
   /// The number of divisions on the chart.
   final int numberOfDivisions;

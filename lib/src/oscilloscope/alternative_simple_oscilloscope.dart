@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_chart/fl_chart.dart';
+import 'package:floscilloscope/src/oscilloscope/oscilloscope_point.dart';
 import 'package:floscilloscope/src/oscilloscope/oscilloscope_axis_chart_data.dart';
 import 'package:floscilloscope/src/oscilloscope/threshold_slider.dart';
 import 'package:flutter/gestures.dart';
@@ -240,14 +240,14 @@ class _AlternativeSimpleOscilloscopeState
                             .asMap()
                             .entries
                             .map((entry) {
-                          return LineSeries<FlSpot, double>(
+                          return LineSeries<OscilloscopePoint, double>(
                             dataLabelSettings:
                                 const DataLabelSettings(isVisible: false),
                             enableTooltip:
                                 widget.oscilloscopeAxisChartData.enableTooltip,
                             dataSource: entry.value,
-                            xValueMapper: (FlSpot data, _) => data.x,
-                            yValueMapper: (FlSpot data, _) => data.y,
+                            xValueMapper: (OscilloscopePoint data, _) => data.x,
+                            yValueMapper: (OscilloscopePoint data, _) => data.y,
                             animationDuration: 0,
                             color: widget.oscilloscopeAxisChartData.colors[entry
                                     .key %

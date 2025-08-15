@@ -65,12 +65,12 @@ class OscilloscopeExample extends StatelessWidget {
   Widget build(BuildContext context) {
     // Sample data points
     final data = [
-      FlSpot(0, 0),
-      FlSpot(1, 1),
-      FlSpot(2, 0.5),
-      FlSpot(3, 1.5),
-      FlSpot(4, 1),
-      FlSpot(5, 2),
+      OscilloscopePoint(0, 0),
+      OscilloscopePoint(1, 1),
+      OscilloscopePoint(2, 0.5),
+      OscilloscopePoint(3, 1.5),
+      OscilloscopePoint(4, 1),
+      OscilloscopePoint(5, 2),
     ];
 
     final oscilloscopeData = OscilloscopeAxisChartData(
@@ -111,19 +111,19 @@ class AlternativeOscilloscopeExample extends StatelessWidget {
   Widget build(BuildContext context) {
     // Sample data points for multiple series
     final dataSeries1 = [
-      FlSpot(0, 0),
-      FlSpot(1, 2),
-      FlSpot(2, 1),
-      FlSpot(3, 3),
-      FlSpot(4, 2),
+      OscilloscopePoint(0, 0),
+      OscilloscopePoint(1, 2),
+      OscilloscopePoint(2, 1),
+      OscilloscopePoint(3, 3),
+      OscilloscopePoint(4, 2),
     ];
 
     final dataSeries2 = [
-      FlSpot(0, 1),
-      FlSpot(1, 3),
-      FlSpot(2, 2),
-      FlSpot(3, 4),
-      FlSpot(4, 3),
+      OscilloscopePoint(0, 1),
+      OscilloscopePoint(1, 3),
+      OscilloscopePoint(2, 2),
+      OscilloscopePoint(3, 4),
+      OscilloscopePoint(4, 3),
     ];
 
     final oscilloscopeData = OscilloscopeAxisChartData(
