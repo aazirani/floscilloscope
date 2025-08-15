@@ -28,3 +28,7 @@
 * The alternative oscilloscope does not use FlSpot from fl_chart anymore, but a custom OscilloscopePoint class.
 * Added test cases.
 * Added more comments and documentation.
+
+## 1.0.5
+
+* Fixed some formatting issues in the code.

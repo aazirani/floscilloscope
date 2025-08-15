@@ -167,7 +167,10 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
                                 .entries
                                 .map(
                                   (entry) => LineChartBarData(
-                                    spots: entry.value.map((point) => FlSpot(point.x, point.y)).toList(),
+                                    spots: entry.value
+                                        .map(
+                                            (point) => FlSpot(point.x, point.y))
+                                        .toList(),
                                     isCurved: false,
                                     preventCurveOverShooting: true,
                                     color: widget
