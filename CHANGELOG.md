@@ -32,3 +32,7 @@
 ## 1.0.5
 
 * Fixed some formatting issues in the code.
+
+## 1.06
+
+* Updated dependencies
