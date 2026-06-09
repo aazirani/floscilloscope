@@ -188,7 +188,9 @@ class _AlternativeSimpleOscilloscopeState
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
               children: [
                 Flexible(
                     flex: 3,
@@ -341,6 +343,7 @@ class _AlternativeSimpleOscilloscopeState
                   },
                 ),
               ],
+            ),
             ),
           ),
         ),

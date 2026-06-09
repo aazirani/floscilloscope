@@ -33,6 +33,14 @@
 
 * Fixed some formatting issues in the code.
 
-## 1.06
+## 1.0.6
+
+* Bug fixes
+
+## 1.1.0
+
+* Added RTL layout support by forcing LTR directionality on chart and slider rows in both SimpleOscilloscope and AlternativeSimpleOscilloscope.
+
+
 
 * Updated dependencies
