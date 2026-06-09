@@ -41,6 +41,6 @@
 
 * Added RTL layout support by forcing LTR directionality on chart and slider rows in both SimpleOscilloscope and AlternativeSimpleOscilloscope.
 
+## 1.1.1
 
-
-* Updated dependencies
+* Fixed threshold dialog text field displaying negative values incorrectly in RTL locales.

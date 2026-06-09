@@ -389,7 +389,9 @@ class _AlternativeSimpleOscilloscopeState
         double newValue = _thresholdValue;
         return AlertDialog(
           title: Text(widget.oscilloscopeAxisChartData.thresholdLabel),
-          content: TextFormField(
+          content: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextFormField(
             initialValue: _thresholdValue.toStringAsFixed(2),
             onChanged: (value) {
               newValue = double.tryParse(value) ?? _thresholdValue;
@@ -407,6 +409,7 @@ class _AlternativeSimpleOscilloscopeState
               });
               Navigator.of(context).pop();
             },
+          ),
           ),
           actions: <Widget>[
             TextButton(

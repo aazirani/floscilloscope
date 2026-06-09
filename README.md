@@ -37,6 +37,7 @@ A customizable oscilloscope widget for Flutter, providing features such as dynam
 - **Extra Plot Lines:** Add additional horizontal lines for markers or reference points.
 - **Interactive Threshold Manipulation:** Double-tap to reset thresholds or open dialogs for precise adjustments.
 - **Optimized Performance:** Efficient rendering with `RepaintBoundary` and optimized widget structures.
+- **RTL Layout Support:** Charts, sliders, and dialogs render correctly in both LTR and RTL locales.
 - **Multiple Chart Libraries:** Possibility to use the [syncfusion_flutter_charts](https://pub.dev/packages/syncfusion_flutter_charts) as well as the [fl_chart](https://pub.dev/packages/fl_chart) packages, depending on your preference.
 
 ## Installation
@@ -45,7 +46,7 @@ Add `floscilloscope` as a dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floscilloscope: ^1.0.4
+  floscilloscope: ^1.1.1
 ```
 
 Then run `flutter pub get` to fetch the package.
