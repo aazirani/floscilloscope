@@ -170,5 +170,239 @@ void main() {
 
       expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
     });
+
+    testWidgets('exposes a public state reachable via GlobalKey', (WidgetTester tester) async {
+      final key = GlobalKey<AlternativeSimpleOscilloscopeState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AlternativeSimpleOscilloscope(
+              key: key,
+              oscilloscopeAxisChartData: testData,
+            ),
+          ),
+        ),
+      );
+
+      expect(key.currentState, isA<AlternativeSimpleOscilloscopeState>());
+    });
+
+    testWidgets('handles data shrink without throwing', (WidgetTester tester) async {
+      final harnessKey = GlobalKey<_DataHarnessState>();
+      final shorter = OscilloscopeAxisChartData(
+        dataPoints: [
+          [const OscilloscopePoint(0, 0)],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataHarness(key: harnessKey, data: testData),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      harnessKey.currentState!.replace(shorter);
+      await tester.pump();
+
+      expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
+    });
+
+    testWidgets('handles data grow without throwing', (WidgetTester tester) async {
+      final harnessKey = GlobalKey<_DataHarnessState>();
+      final longer = OscilloscopeAxisChartData(
+        dataPoints: [
+          [
+            const OscilloscopePoint(0, 0),
+            const OscilloscopePoint(1, 1),
+            const OscilloscopePoint(2, 2),
+            const OscilloscopePoint(3, 3),
+            const OscilloscopePoint(4, 4),
+          ],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataHarness(key: harnessKey, data: testData),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      harnessKey.currentState!.replace(longer);
+      await tester.pump();
+
+      expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
+    });
+
+    testWidgets('handles series count changes without throwing', (WidgetTester tester) async {
+      final harnessKey = GlobalKey<_DataHarnessState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataHarness(key: harnessKey, data: testData),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      harnessKey.currentState!.replace(OscilloscopeAxisChartData(
+        dataPoints: <List<OscilloscopePoint>>[],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      ));
+      await tester.pump();
+
+      harnessKey.currentState!.replace(OscilloscopeAxisChartData(
+        dataPoints: [
+          [const OscilloscopePoint(0, 0)],
+          [const OscilloscopePoint(0, 1)],
+          [const OscilloscopePoint(0, 2)],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      ));
+      await tester.pump();
+
+      harnessKey.currentState!.replace(testData);
+      await tester.pump();
+
+      expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
+    });
+
+    testWidgets('clearData() immediately empties the chart without throwing', (WidgetTester tester) async {
+      final chartKey = GlobalKey<AlternativeSimpleOscilloscopeState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AlternativeSimpleOscilloscope(
+              key: chartKey,
+              oscilloscopeAxisChartData: testData,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      chartKey.currentState!.clearData();
+      await tester.pump();
+
+      expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
+      expect(chartKey.currentState, isNotNull);
+    });
+
+    testWidgets('chart can be repopulated after clearData()', (WidgetTester tester) async {
+      final chartKey = GlobalKey<AlternativeSimpleOscilloscopeState>();
+      final harnessKey = GlobalKey<_DataWrapperState>();
+      final freshData = OscilloscopeAxisChartData(
+        dataPoints: [
+          [const OscilloscopePoint(5, 5), const OscilloscopePoint(6, 6)],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataWrapper(
+              key: harnessKey,
+              chartKey: chartKey,
+              data: testData,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      harnessKey.currentState!.clearAndReplace(freshData);
+      await tester.pump();
+
+      expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
+    });
   });
+}
+
+class _DataHarness extends StatefulWidget {
+  final OscilloscopeAxisChartData data;
+  const _DataHarness({super.key, required this.data});
+
+  @override
+  State<_DataHarness> createState() => _DataHarnessState();
+}
+
+class _DataHarnessState extends State<_DataHarness> {
+  late OscilloscopeAxisChartData _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = widget.data;
+  }
+
+  void replace(OscilloscopeAxisChartData data) {
+    setState(() => _data = data);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlternativeSimpleOscilloscope(oscilloscopeAxisChartData: _data);
+  }
+}
+
+class _DataWrapper extends StatefulWidget {
+  final GlobalKey<AlternativeSimpleOscilloscopeState> chartKey;
+  final OscilloscopeAxisChartData data;
+  const _DataWrapper({
+    super.key,
+    required this.chartKey,
+    required this.data,
+  });
+
+  @override
+  State<_DataWrapper> createState() => _DataWrapperState();
+}
+
+class _DataWrapperState extends State<_DataWrapper> {
+  late OscilloscopeAxisChartData _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = widget.data;
+  }
+
+  void clearAndReplace(OscilloscopeAxisChartData data) {
+    widget.chartKey.currentState?.clearData();
+    setState(() => _data = data);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlternativeSimpleOscilloscope(
+      key: widget.chartKey,
+      oscilloscopeAxisChartData: _data,
+    );
+  }
 }

@@ -32,6 +32,13 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 /// - Extra plot lines for additional reference markers
 /// - Tooltip support for data point inspection
 ///
+/// Data updates are pushed to the chart through
+/// [ChartSeriesController.updateDataSource] so that replacing a series with a
+/// shorter list correctly removes the stale trailing points, and high-frequency
+/// data-only refreshes avoid a full [SfCartesianChart] rebuild. Use
+/// [AlternativeSimpleOscilloscopeState.clearData] through a [GlobalKey] to
+/// immediately clear all rendered data.
+///
 /// Example usage:
 /// ```dart
 /// AlternativeSimpleOscilloscope(
@@ -75,24 +82,50 @@ class AlternativeSimpleOscilloscope extends StatefulWidget {
 
   @override
   State<AlternativeSimpleOscilloscope> createState() =>
-      _AlternativeSimpleOscilloscopeState();
+      AlternativeSimpleOscilloscopeState();
 }
 
-class _AlternativeSimpleOscilloscopeState
+/// State for [AlternativeSimpleOscilloscope].
+///
+/// Exposed publicly so consumers can drive imperative updates through a
+/// [GlobalKey]:
+///
+/// ```dart
+/// final key = GlobalKey<AlternativeSimpleOscilloscopeState>();
+/// AlternativeSimpleOscilloscope(key: key, ...);
+/// key.currentState?.clearData();
+/// ```
+///
+/// The state owns the mutable per-series data sources handed to the chart and
+/// keeps them in sync with [OscilloscopeAxisChartData.dataPoints] via
+/// [ChartSeriesController.updateDataSource]. This avoids a full
+/// [SfCartesianChart] rebuild on data-only changes and correctly truncates the
+/// stale trailing points when a series shrinks.
+class AlternativeSimpleOscilloscopeState
     extends State<AlternativeSimpleOscilloscope> {
   double _thresholdProgressbarValue = 0.0;
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryXAxisRenderKey =
-      GlobalKey<_AlternativeSimpleOscilloscopeState>();
-  final GlobalKey<_AlternativeSimpleOscilloscopeState> _primaryYAxisRenderKey =
-      GlobalKey<_AlternativeSimpleOscilloscopeState>();
+  final GlobalKey<AlternativeSimpleOscilloscopeState> _primaryXAxisRenderKey =
+      GlobalKey<AlternativeSimpleOscilloscopeState>();
+  final GlobalKey<AlternativeSimpleOscilloscopeState> _primaryYAxisRenderKey =
+      GlobalKey<AlternativeSimpleOscilloscopeState>();
 
   late double _thresholdProgressbarMaximum;
   late double _thresholdProgressbarMinimum;
   late double _zoomFactor = 1.0;
   late double _zoomPosition = 0.0;
+
+  /// Mutable data source lists owned by this state. These are the lists handed
+  /// to each [LineSeries] as its `dataSource`; they are updated in place so the
+  /// series keep a stable list identity while their contents change.
+  late List<List<OscilloscopePoint>> _dataSources;
+
+  /// Syncfusion series controllers, one per series, captured through
+  /// [LineSeries.onRendererCreated]. Used to push incremental data updates
+  /// without rebuilding the whole chart.
+  late List<ChartSeriesController?> _seriesControllers;
 
   Timer? _doubleTapTimer;
   int _pointerCount = 0;
@@ -104,6 +137,11 @@ class _AlternativeSimpleOscilloscopeState
   @override
   void initState() {
     super.initState();
+    _dataSources = widget.oscilloscopeAxisChartData.dataPoints
+        .map((list) => List<OscilloscopePoint>.from(list))
+        .toList();
+    _seriesControllers =
+        List<ChartSeriesController?>.generate(_dataSources.length, (_) => null);
     _thresholdProgressbarMaximum =
         widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
             widget.oscilloscopeAxisChartData.numberOfDivisions;
@@ -119,12 +157,18 @@ class _AlternativeSimpleOscilloscopeState
 
   @override
   void dispose() {
+    _dataSources.clear();
+    _seriesControllers.clear();
+    _doubleTapTimer?.cancel();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant AlternativeSimpleOscilloscope oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    _handleDataUpdate(oldWidget.oscilloscopeAxisChartData.dataPoints,
+        widget.oscilloscopeAxisChartData.dataPoints);
 
     if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
             oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
@@ -136,6 +180,107 @@ class _AlternativeSimpleOscilloscopeState
         _thresholdProgressbarValue = _thresholdValue;
         _handleZoom();
       });
+    }
+  }
+
+  /// Pushes incremental data updates to the chart through the series
+  /// controllers.
+  ///
+  /// When the number of series changes the chart is rebuilt via [setState]
+  /// (this is rare). Otherwise each series' owned data source is updated in
+  /// place and the change is described to Syncfusion with
+  /// [ChartSeriesController.updateDataSource]:
+  ///
+  /// * same length -> re-render the whole range,
+  /// * shrink      -> re-render the survivors then remove the trailing points
+  ///                  (this is what clears the stale trailing points),
+  /// * grow        -> re-render the existing points then append the new ones.
+  ///
+  /// No [setState] is needed for same-count updates, so high-frequency
+  /// data-only refreshes skip a full [SfCartesianChart] reconciliation.
+  void _handleDataUpdate(
+      List<List<OscilloscopePoint>> oldData,
+      List<List<OscilloscopePoint>> newData) {
+    if (newData.length != _dataSources.length) {
+      setState(() {
+        _dataSources =
+            newData.map((list) => List<OscilloscopePoint>.from(list)).toList();
+        _seriesControllers =
+            List<ChartSeriesController?>.generate(_dataSources.length, (_) => null);
+      });
+      return;
+    }
+
+    for (int i = 0; i < newData.length; i++) {
+      final controller = _seriesControllers[i];
+      final source = _dataSources[i];
+      final incoming = newData[i];
+
+      if (identical(source, incoming) && source.length == incoming.length) {
+        continue;
+      }
+
+      final oldLen = source.length;
+      source
+        ..clear()
+        ..addAll(incoming);
+      final newLen = source.length;
+
+      if (controller == null) {
+        continue;
+      }
+
+      if (newLen == oldLen) {
+        if (newLen > 0) {
+          controller.updateDataSource(
+            updatedDataIndexes: List<int>.generate(newLen, (i) => i),
+          );
+        }
+      } else if (newLen < oldLen) {
+        if (newLen > 0) {
+          controller.updateDataSource(
+            updatedDataIndexes: List<int>.generate(newLen, (i) => i),
+          );
+        }
+        controller.updateDataSource(
+          removedDataIndexes:
+              List<int>.generate(oldLen - newLen, (i) => newLen + i),
+        );
+      } else {
+        if (oldLen > 0) {
+          controller.updateDataSource(
+            updatedDataIndexes: List<int>.generate(oldLen, (i) => i),
+          );
+        }
+        controller.updateDataSource(
+          addedDataIndexes:
+              List<int>.generate(newLen - oldLen, (i) => oldLen + i),
+        );
+      }
+    }
+  }
+
+  /// Immediately clears every rendered series.
+  ///
+  /// This bypasses the widget rebuild cycle so the chart is emptied on the next
+  /// frame regardless of the consumer's refresh cadence. Subsequent updates
+  /// delivered through [didUpdateWidget] repopulate the chart normally.
+  ///
+  /// ```dart
+  /// final key = GlobalKey<AlternativeSimpleOscilloscopeState>();
+  /// AlternativeSimpleOscilloscope(key: key, ...);
+  /// key.currentState?.clearData();
+  /// ```
+  void clearData() {
+    for (int i = 0; i < _dataSources.length; i++) {
+      final controller = _seriesControllers[i];
+      final oldLen = _dataSources[i].length;
+      _dataSources[i].clear();
+      if (controller != null && oldLen > 0) {
+        controller.updateDataSource(
+          removedDataIndexes: List<int>.generate(oldLen, (i) => i),
+        );
+      }
     }
   }
 
@@ -292,16 +437,19 @@ class _AlternativeSimpleOscilloscopeState
                             .verticalAxisValuePerDivision,
                       ),
                       series: [
-                        ...widget.oscilloscopeAxisChartData.dataPoints
-                            .asMap()
-                            .entries
-                            .map((entry) {
+                        ..._dataSources.asMap().entries.map((entry) {
                           return LineSeries<OscilloscopePoint, double>(
+                            key: ValueKey<String>('series_${entry.key}'),
                             dataLabelSettings:
                                 const DataLabelSettings(isVisible: false),
                             enableTooltip:
                                 widget.oscilloscopeAxisChartData.enableTooltip,
-                            dataSource: entry.value,
+                            dataSource: _dataSources[entry.key],
+                            onRendererCreated: (ChartSeriesController controller) {
+                              if (entry.key < _seriesControllers.length) {
+                                _seriesControllers[entry.key] = controller;
+                              }
+                            },
                             xValueMapper: (OscilloscopePoint data, _) => data.x,
                             yValueMapper: (OscilloscopePoint data, _) => data.y,
                             animationDuration: 0,

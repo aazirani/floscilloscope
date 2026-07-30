@@ -41,6 +41,11 @@
 
 * Added RTL layout support by forcing LTR directionality on chart and slider rows in both SimpleOscilloscope and AlternativeSimpleOscilloscope.
 
+## 1.1.2
+
+* Fixed stale trailing points remaining on the `AlternativeSimpleOscilloscope` chart when a series is replaced with a shorter list. Data updates are now pushed through `ChartSeriesController.updateDataSource`, which also avoids a full `SfCartesianChart` rebuild on data-only changes.
+* Added `AlternativeSimpleOscilloscopeState.clearData()` to immediately clear all rendered data, and exposed the state class publicly so it can be reached through a `GlobalKey`.
+
 ## 1.1.1
 
 * Fixed threshold dialog text field displaying negative values incorrectly in RTL locales.
