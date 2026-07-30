@@ -18,12 +18,12 @@ platforms:
   windows:
 
 dependencies:
-  syncfusion_flutter_core: ^33.2.3
-  syncfusion_flutter_sliders: ^33.2.3
+  syncfusion_flutter_core: ^34.1.33
+  syncfusion_flutter_sliders: ^34.1.33
   fl_chart: ^1.2.0
   flutter:
     sdk: flutter
-  syncfusion_flutter_charts: ^33.2.3
+  syncfusion_flutter_charts: ^34.1.33
 
 dev_dependencies:
   flutter_test:

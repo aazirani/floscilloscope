@@ -45,6 +45,7 @@
 
 * Fixed stale trailing points remaining on the `AlternativeSimpleOscilloscope` chart when a series is replaced with a shorter list. Data updates are now pushed through `ChartSeriesController.updateDataSource`, which also avoids a full `SfCartesianChart` rebuild on data-only changes.
 * Added `AlternativeSimpleOscilloscopeState.clearData()` to immediately clear all rendered data, and exposed the state class publicly so it can be reached through a `GlobalKey`.
+* Upgraded the Syncfusion dependencies (`syncfusion_flutter_charts`, `syncfusion_flutter_core`, `syncfusion_flutter_sliders`) from `^33.2.3` to `^34.1.33` in both the package and the example app.
 
 ## 1.1.1
 
