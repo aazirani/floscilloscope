@@ -43,7 +43,7 @@ class OscilloscopePoint {
           y == other.y;
 
   @override
-  int get hashCode => x.hashCode ^ y.hashCode;
+  int get hashCode => Object.hash(x, y);
 
   @override
   String toString() => 'OscilloscopePoint($x, $y)';

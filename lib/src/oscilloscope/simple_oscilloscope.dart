@@ -64,10 +64,8 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  final GlobalKey<_SimpleOscilloscopeState> _chartAndLabelAreaRenderKey =
-      GlobalKey<_SimpleOscilloscopeState>();
-  final GlobalKey<_SimpleOscilloscopeState> _chartAreaRenderKey =
-      GlobalKey<_SimpleOscilloscopeState>();
+  final GlobalKey _chartAndLabelAreaRenderKey = GlobalKey();
+  final GlobalKey _chartAreaRenderKey = GlobalKey();
 
   @override
   void initState() {
@@ -88,16 +86,24 @@ class _SimpleOscilloscopeState extends State<SimpleOscilloscope> {
   void didUpdateWidget(covariant SimpleOscilloscope oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
+    final bool axisConfigChanged =
+        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
             oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
         widget.oscilloscopeAxisChartData.numberOfDivisions !=
-            oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
-        _thresholdValue != widget.oscilloscopeAxisChartData.threshold) {
+            oldWidget.oscilloscopeAxisChartData.numberOfDivisions;
+    if (axisConfigChanged ||
+        widget.oscilloscopeAxisChartData.threshold !=
+            oldWidget.oscilloscopeAxisChartData.threshold) {
       setState(() {
         _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
         _thresholdProgressbarValue = _thresholdValue;
         _clampThresholdProgressbarValue();
       });
+      if (axisConfigChanged) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _calculateBottomPadding();
+        });
+      }
     }
   }
 

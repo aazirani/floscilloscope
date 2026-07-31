@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:floscilloscope/floscilloscope.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 void main() {
   group('AlternativeSimpleOscilloscope Widget Tests', () {
@@ -341,12 +342,132 @@ void main() {
 
       expect(find.byType(AlternativeSimpleOscilloscope), findsOneWidget);
     });
+
+    testWidgets('recaptures series controllers after a count change',
+        (WidgetTester tester) async {
+      final chartKey = GlobalKey<AlternativeSimpleOscilloscopeState>();
+      final harnessKey = GlobalKey<_DataHarnessState>();
+
+      final threeSeries = OscilloscopeAxisChartData(
+        dataPoints: [
+          [const OscilloscopePoint(0, 0), const OscilloscopePoint(1, 1)],
+          [const OscilloscopePoint(0, 1), const OscilloscopePoint(1, 2)],
+          [const OscilloscopePoint(0, 2), const OscilloscopePoint(1, 3)],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      );
+      final oneSeries = OscilloscopeAxisChartData(
+        dataPoints: [
+          [
+            const OscilloscopePoint(0, 0),
+            const OscilloscopePoint(1, 1),
+            const OscilloscopePoint(2, 2)
+          ],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataHarness(
+                key: harnessKey, chartKey: chartKey, data: threeSeries),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(chartKey.currentState!.controllerCount, 3);
+
+      // Shrink 3 -> 1: surviving series must recapture its controller.
+      harnessKey.currentState!.replace(oneSeries);
+      await tester.pumpAndSettle();
+      expect(chartKey.currentState!.controllerCount, 1);
+
+      // A subsequent same-count data update must still reach the controller
+      // (this is exactly the stale-data regression).
+      harnessKey.currentState!.replace(OscilloscopeAxisChartData(
+        dataPoints: [
+          [
+            const OscilloscopePoint(0, 5),
+            const OscilloscopePoint(1, 6),
+            const OscilloscopePoint(2, 7)
+          ],
+        ],
+        horizontalAxisLabel: 'Time',
+        verticalAxisLabel: 'Voltage',
+        horizontalAxisUnit: 's',
+        verticalAxisUnit: 'V',
+      ));
+      await tester.pumpAndSettle();
+      expect(chartKey.currentState!.controllerCount, 1);
+
+      // Grow 1 -> 3.
+      harnessKey.currentState!.replace(threeSeries);
+      await tester.pumpAndSettle();
+      expect(chartKey.currentState!.controllerCount, 3);
+    });
+
+    testWidgets('threshold value is not reverted by a data-tick rebuild',
+        (WidgetTester tester) async {
+      final chartKey = GlobalKey<AlternativeSimpleOscilloscopeState>();
+      final harnessKey = GlobalKey<_DataHarnessState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _DataHarness(
+                key: harnessKey, chartKey: chartKey, data: testData),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(chartKey.currentState!.currentThresholdValue, 1.0);
+
+      // Simulate a user drag that set the local threshold.
+      chartKey.currentState!.currentThresholdValue = 3.5;
+
+      // Data-tick rebuild with the SAME threshold prop (consumer did not
+      // round-trip the dragged value back into the data model).
+      harnessKey.currentState!.replace(testData);
+      await tester.pumpAndSettle();
+
+      // Must NOT have reverted to the prop value.
+      expect(chartKey.currentState!.currentThresholdValue, 3.5);
+    });
+
+    testWidgets('wraps the chart in a RepaintBoundary',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AlternativeSimpleOscilloscope(
+              oscilloscopeAxisChartData: testData,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final chart = find.byType(SfCartesianChart);
+      expect(chart, findsOneWidget);
+      expect(
+        find.ancestor(of: chart, matching: find.byType(RepaintBoundary)),
+        findsWidgets,
+      );
+    });
   });
 }
 
 class _DataHarness extends StatefulWidget {
   final OscilloscopeAxisChartData data;
-  const _DataHarness({super.key, required this.data});
+  final GlobalKey<AlternativeSimpleOscilloscopeState>? chartKey;
+  const _DataHarness({super.key, required this.data, this.chartKey});
 
   @override
   State<_DataHarness> createState() => _DataHarnessState();
@@ -367,7 +488,10 @@ class _DataHarnessState extends State<_DataHarness> {
 
   @override
   Widget build(BuildContext context) {
-    return AlternativeSimpleOscilloscope(oscilloscopeAxisChartData: _data);
+    return AlternativeSimpleOscilloscope(
+      key: widget.chartKey,
+      oscilloscopeAxisChartData: _data,
+    );
   }
 }
 

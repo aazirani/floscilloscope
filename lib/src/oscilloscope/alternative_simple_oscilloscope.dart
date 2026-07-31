@@ -107,15 +107,20 @@ class AlternativeSimpleOscilloscopeState
   double _thresholdValue = 0.0;
   double _sliderBottomPadding = 0.0;
 
-  final GlobalKey<AlternativeSimpleOscilloscopeState> _primaryXAxisRenderKey =
-      GlobalKey<AlternativeSimpleOscilloscopeState>();
-  final GlobalKey<AlternativeSimpleOscilloscopeState> _primaryYAxisRenderKey =
-      GlobalKey<AlternativeSimpleOscilloscopeState>();
+  final GlobalKey _primaryXAxisRenderKey = GlobalKey();
+  final GlobalKey _primaryYAxisRenderKey = GlobalKey();
 
   late double _thresholdProgressbarMaximum;
   late double _thresholdProgressbarMinimum;
   late double _zoomFactor = 1.0;
   late double _zoomPosition = 0.0;
+
+  /// Bumped whenever the number of series changes so each surviving series
+  /// gets a fresh key and its renderer is recreated. This forces
+  /// [LineSeries.onRendererCreated] to fire again so the series controller is
+  /// recaptured; otherwise it would stay null and data updates would be
+  /// silently skipped after a count change.
+  int _seriesGen = 0;
 
   /// Mutable data source lists owned by this state. These are the lists handed
   /// to each [LineSeries] as its `dataSource`; they are updated in place so the
@@ -126,6 +131,12 @@ class AlternativeSimpleOscilloscopeState
   /// [LineSeries.onRendererCreated]. Used to push incremental data updates
   /// without rebuilding the whole chart.
   late List<ChartSeriesController?> _seriesControllers;
+
+  /// Reusable buffer of consecutive indexes handed to
+  /// [ChartSeriesController.updateDataSource]. Syncfusion copies the list
+  /// immediately, so a single buffer can be reused across calls, series, and
+  /// ticks to avoid per-tick allocations.
+  final List<int> _indexBuffer = [];
 
   Timer? _doubleTapTimer;
   int _pointerCount = 0;
@@ -170,16 +181,24 @@ class AlternativeSimpleOscilloscopeState
     _handleDataUpdate(oldWidget.oscilloscopeAxisChartData.dataPoints,
         widget.oscilloscopeAxisChartData.dataPoints);
 
-    if (widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
+    final bool axisConfigChanged =
+        widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision !=
             oldWidget.oscilloscopeAxisChartData.verticalAxisValuePerDivision ||
         widget.oscilloscopeAxisChartData.numberOfDivisions !=
-            oldWidget.oscilloscopeAxisChartData.numberOfDivisions ||
-        _thresholdValue != widget.oscilloscopeAxisChartData.threshold) {
+            oldWidget.oscilloscopeAxisChartData.numberOfDivisions;
+    if (axisConfigChanged ||
+        widget.oscilloscopeAxisChartData.threshold !=
+            oldWidget.oscilloscopeAxisChartData.threshold) {
       setState(() {
         _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
         _thresholdProgressbarValue = _thresholdValue;
         _handleZoom();
       });
+      if (axisConfigChanged) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _calculateBottomPadding();
+        });
+      }
     }
   }
 
@@ -203,6 +222,7 @@ class AlternativeSimpleOscilloscopeState
       List<List<OscilloscopePoint>> newData) {
     if (newData.length != _dataSources.length) {
       setState(() {
+        _seriesGen++;
         _dataSources =
             newData.map((list) => List<OscilloscopePoint>.from(list)).toList();
         _seriesControllers =
@@ -216,10 +236,6 @@ class AlternativeSimpleOscilloscopeState
       final source = _dataSources[i];
       final incoming = newData[i];
 
-      if (identical(source, incoming) && source.length == incoming.length) {
-        continue;
-      }
-
       final oldLen = source.length;
       source
         ..clear()
@@ -232,32 +248,39 @@ class AlternativeSimpleOscilloscopeState
 
       if (newLen == oldLen) {
         if (newLen > 0) {
-          controller.updateDataSource(
-            updatedDataIndexes: List<int>.generate(newLen, (i) => i),
-          );
+          controller.updateDataSource(updatedDataIndexes: _range(0, newLen));
         }
       } else if (newLen < oldLen) {
         if (newLen > 0) {
-          controller.updateDataSource(
-            updatedDataIndexes: List<int>.generate(newLen, (i) => i),
-          );
+          controller.updateDataSource(updatedDataIndexes: _range(0, newLen));
         }
         controller.updateDataSource(
-          removedDataIndexes:
-              List<int>.generate(oldLen - newLen, (i) => newLen + i),
-        );
+            removedDataIndexes: _range(newLen, oldLen - newLen));
       } else {
         if (oldLen > 0) {
-          controller.updateDataSource(
-            updatedDataIndexes: List<int>.generate(oldLen, (i) => i),
-          );
+          controller.updateDataSource(updatedDataIndexes: _range(0, oldLen));
         }
         controller.updateDataSource(
-          addedDataIndexes:
-              List<int>.generate(newLen - oldLen, (i) => oldLen + i),
-        );
+            addedDataIndexes: _range(oldLen, newLen - oldLen));
       }
     }
+  }
+
+  /// Returns consecutive indexes `[start, start + 1, ..., start + count - 1]`
+  /// using a shared, reusable buffer. Syncfusion copies the list inside
+  /// [ChartSeriesController.updateDataSource], so the same buffer can be reused
+  /// across calls, series, and ticks.
+  List<int> _range(int start, int count) {
+    while (_indexBuffer.length < count) {
+      _indexBuffer.add(0);
+    }
+    if (_indexBuffer.length > count) {
+      _indexBuffer.removeRange(count, _indexBuffer.length);
+    }
+    for (int i = 0; i < count; i++) {
+      _indexBuffer[i] = start + i;
+    }
+    return _indexBuffer;
   }
 
   /// Immediately clears every rendered series.
@@ -277,12 +300,28 @@ class AlternativeSimpleOscilloscopeState
       final oldLen = _dataSources[i].length;
       _dataSources[i].clear();
       if (controller != null && oldLen > 0) {
-        controller.updateDataSource(
-          removedDataIndexes: List<int>.generate(oldLen, (i) => i),
-        );
+        controller.updateDataSource(removedDataIndexes: _range(0, oldLen));
       }
     }
   }
+
+  /// The number of series whose [ChartSeriesController] has been captured.
+  ///
+  /// Exposed for testing: after a series-count change every surviving series
+  /// must recapture its controller, otherwise data updates are silently
+  /// skipped and stale points remain on the chart.
+  @visibleForTesting
+  int get controllerCount =>
+      _seriesControllers.whereType<ChartSeriesController>().length;
+
+  /// The threshold value currently held by this state.
+  ///
+  /// Exposed for testing so a user drag can be simulated without driving the
+  /// slider gestures, and so the value can be asserted after a rebuild.
+  @visibleForTesting
+  double get currentThresholdValue => _thresholdValue;
+  @visibleForTesting
+  set currentThresholdValue(double value) => _thresholdValue = value;
 
   void _clampThresholdProgressbarValue() {
     _thresholdProgressbarValue = _thresholdProgressbarValue.clamp(
@@ -311,14 +350,13 @@ class AlternativeSimpleOscilloscopeState
     _clampThresholdProgressbarValue();
   }
 
-  double calculateZoomedMin(double currentMin, double currentMax,
-      double zoomFactor, double zoomPosition) {
+  double _calculateZoomedMin(
+      double currentMin, double currentMax, double zoomPosition) {
     double range = currentMax - currentMin;
-    double zoomedMin = currentMin + range * zoomPosition;
-    return zoomedMin;
+    return currentMin + range * zoomPosition;
   }
 
-  double calculateZoomedMax(double zoomedMin, double currentMin,
+  double _calculateZoomedMax(double zoomedMin, double currentMin,
       double currentMax, double zoomFactor) {
     double range = currentMax - currentMin;
     double zoomedRange = range * zoomFactor;
@@ -339,7 +377,8 @@ class AlternativeSimpleOscilloscopeState
               children: [
                 Flexible(
                     flex: 3,
-                    child: SfCartesianChart(
+                    child: RepaintBoundary(
+                        child: SfCartesianChart(
                       tooltipBehavior: TooltipBehavior(
                         enable: widget.oscilloscopeAxisChartData.enableTooltip,
                         animationDuration: 0,
@@ -439,7 +478,8 @@ class AlternativeSimpleOscilloscopeState
                       series: [
                         ..._dataSources.asMap().entries.map((entry) {
                           return LineSeries<OscilloscopePoint, double>(
-                            key: ValueKey<String>('series_${entry.key}'),
+                            key: ValueKey<String>(
+                                'series_${entry.key}_gen$_seriesGen'),
                             dataLabelSettings:
                                 const DataLabelSettings(isVisible: false),
                             enableTooltip:
@@ -460,6 +500,7 @@ class AlternativeSimpleOscilloscopeState
                         })
                       ],
                     )),
+                  ),
                 const SizedBox(width: 16),
                 ThresholdSlider(
                   min: _thresholdProgressbarMinimum,
@@ -517,10 +558,9 @@ class AlternativeSimpleOscilloscopeState
         widget.oscilloscopeAxisChartData.verticalAxisValuePerDivision *
             widget.oscilloscopeAxisChartData.numberOfDivisions;
 
-    double zoomedMin =
-        calculateZoomedMin(currentMin, currentMax, _zoomFactor, _zoomPosition);
+    double zoomedMin = _calculateZoomedMin(currentMin, currentMax, _zoomPosition);
     double zoomedMax =
-        calculateZoomedMax(zoomedMin, currentMin, currentMax, _zoomFactor);
+        _calculateZoomedMax(zoomedMin, currentMin, currentMax, _zoomFactor);
 
     setState(() {
       _thresholdProgressbarMaximum = zoomedMax;

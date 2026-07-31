@@ -46,6 +46,12 @@
 * Fixed stale trailing points remaining on the `AlternativeSimpleOscilloscope` chart when a series is replaced with a shorter list. Data updates are now pushed through `ChartSeriesController.updateDataSource`, which also avoids a full `SfCartesianChart` rebuild on data-only changes.
 * Added `AlternativeSimpleOscilloscopeState.clearData()` to immediately clear all rendered data, and exposed the state class publicly so it can be reached through a `GlobalKey`.
 * Upgraded the Syncfusion dependencies (`syncfusion_flutter_charts`, `syncfusion_flutter_core`, `syncfusion_flutter_sliders`) from `^33.2.3` to `^34.1.33` in both the package and the example app.
+* Fixed stale data persisting on `AlternativeSimpleOscilloscope` after the number of series changes. Surviving series now get a generation-keyed rebuild so their `ChartSeriesController` is recaptured (otherwise `updateDataSource` was silently skipped and stale points remained).
+* Fixed a threshold drag being reverted on every data-tick rebuild in both `SimpleOscilloscope` and `AlternativeSimpleOscilloscope`. Threshold change detection now compares the previous vs new widget instead of state vs widget.
+* Wrapped the `AlternativeSimpleOscilloscope` chart in a `RepaintBoundary` for streaming paint isolation.
+* Added a streaming (timer-driven) example that exercises the real-time update path of both oscilloscopes.
+* Cleanup: removed a dead `identical()` guard, switched to plain `GlobalKey` types, re-measure slider padding when axis config changes, reuse an index buffer for data updates, and use `Object.hash` for `OscilloscopePoint.hashCode`.
+* BREAKING (minor): made `calculateZoomedMin`/`calculateZoomedMax` private (they were undocumented internal helpers).
 
 ## 1.1.1
 
