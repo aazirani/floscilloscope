@@ -21,6 +21,7 @@ A customizable oscilloscope widget for Flutter, providing features such as dynam
     - [Usage](#usage)
         - [Using `SimpleOscilloscope` Widget](#using-simpleoscilloscope-widget)
         - [Using `AlternativeSimpleOscilloscope` Widget](#using-alternativesimpleoscilloscope-widget)
+            - [Updating Data and Clearing the Chart](#updating-data-and-clearing-the-chart-alternativesimpleoscilloscope)
         - [Configuring `OscilloscopeAxisChartData`](#configuring-oscilloscopeaxischartdata)
     - [Contributing](#contributing)
     - [License](#license)
@@ -37,6 +38,7 @@ A customizable oscilloscope widget for Flutter, providing features such as dynam
 - **Extra Plot Lines:** Add additional horizontal lines for markers or reference points.
 - **Interactive Threshold Manipulation:** Double-tap to reset thresholds or open dialogs for precise adjustments.
 - **Optimized Performance:** Efficient rendering with `RepaintBoundary` and optimized widget structures.
+- **Real-time Streaming & Instant Clearing:** `AlternativeSimpleOscilloscope` streams high-frequency data updates without full chart rebuilds, and can be cleared instantly via `clearData()`.
 - **RTL Layout Support:** Charts, sliders, and dialogs render correctly in both LTR and RTL locales.
 - **Multiple Chart Libraries:** Possibility to use the [syncfusion_flutter_charts](https://pub.dev/packages/syncfusion_flutter_charts) as well as the [fl_chart](https://pub.dev/packages/fl_chart) packages, depending on your preference.
 
@@ -46,7 +48,7 @@ Add `floscilloscope` as a dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floscilloscope: ^1.1.1
+  floscilloscope: ^1.1.2
 ```
 
 Then run `flutter pub get` to fetch the package.
@@ -152,6 +154,32 @@ class AlternativeOscilloscopeExample extends StatelessWidget {
   }
 }
 ```
+
+#### Updating Data and Clearing the Chart (AlternativeSimpleOscilloscope)
+
+`AlternativeSimpleOscilloscope` owns its data internally and pushes data-only changes to the chart through `ChartSeriesController.updateDataSource` instead of rebuilding the whole chart. This keeps high-frequency (e.g. timer-driven) updates efficient and correctly removes stale trailing points when a series shrinks or when the number of series changes. Just rebuild the widget with the new `dataPoints`:
+
+```dart
+// On a Timer or in a ValueListenableBuilder callback:
+_chartData.dataPoints[0] = updatedPoints;
+setState(() {});
+```
+
+To clear all rendered data immediately — bypassing the rebuild cycle — reach the (public) state through a `GlobalKey` and call `clearData()`:
+
+```dart
+final _chartKey = GlobalKey<AlternativeSimpleOscilloscopeState>();
+
+AlternativeSimpleOscilloscope(
+  key: _chartKey,
+  oscilloscopeAxisChartData: _chartData,
+);
+
+// Clear instantly, e.g. when starting a new acquisition:
+_chartKey.currentState?.clearData();
+```
+
+A threshold you set by dragging the slider is preserved across data-tick rebuilds; only an actual change to the `threshold` passed into `OscilloscopeAxisChartData` resets the displayed value.
 
 ### Configuring `OscilloscopeAxisChartData`
 
