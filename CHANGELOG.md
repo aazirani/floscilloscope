@@ -41,6 +41,10 @@
 
 * Added RTL layout support by forcing LTR directionality on chart and slider rows in both SimpleOscilloscope and AlternativeSimpleOscilloscope.
 
+## 1.1.1
+
+* Fixed threshold dialog text field displaying negative values incorrectly in RTL locales.
+
 ## 1.1.2
 
 * Fixed stale trailing points remaining on the `AlternativeSimpleOscilloscope` chart when a series is replaced with a shorter list. Data updates are now pushed through `ChartSeriesController.updateDataSource`, which also avoids a full `SfCartesianChart` rebuild on data-only changes.
@@ -52,7 +56,3 @@
 * Added a streaming (timer-driven) example that exercises the real-time update path of both oscilloscopes.
 * Cleanup: removed a dead `identical()` guard, switched to plain `GlobalKey` types, re-measure slider padding when axis config changes, reuse an index buffer for data updates, and use `Object.hash` for `OscilloscopePoint.hashCode`.
 * BREAKING (minor): made `calculateZoomedMin`/`calculateZoomedMax` private (they were undocumented internal helpers).
-
-## 1.1.1
-
-* Fixed threshold dialog text field displaying negative values incorrectly in RTL locales.
