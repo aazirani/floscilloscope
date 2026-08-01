@@ -48,7 +48,7 @@ Add `floscilloscope` as a dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floscilloscope: ^1.1.2
+  floscilloscope: ^1.1.3
 ```
 
 Then run `flutter pub get` to fetch the package.
