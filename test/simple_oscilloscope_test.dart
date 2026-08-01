@@ -237,5 +237,137 @@ void main() {
       expect(find.byType(SimpleOscilloscope), findsOneWidget);
     });
 
+    testWidgets(
+      'threshold resets to the new prop value on didUpdateWidget',
+      (WidgetTester tester) async {
+        final key = GlobalKey<SimpleOscilloscopeState>();
+        var data = OscilloscopeAxisChartData(
+          dataPoints: testData.dataPoints,
+          horizontalAxisLabel: testData.horizontalAxisLabel,
+          verticalAxisLabel: testData.verticalAxisLabel,
+          horizontalAxisUnit: testData.horizontalAxisUnit,
+          verticalAxisUnit: testData.verticalAxisUnit,
+          threshold: 2.0,
+          onThresholdValueChanged: (_) {},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SimpleOscilloscope(
+                key: key,
+                oscilloscopeAxisChartData: data,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final slider =
+            tester.widget<ThresholdSlider>(find.byType(ThresholdSlider));
+        slider.onChangeEnd(4.5);
+        await tester.pump();
+        expect(key.currentState!.currentThresholdValue, 4.5);
+
+        data = OscilloscopeAxisChartData(
+          dataPoints: testData.dataPoints,
+          horizontalAxisLabel: testData.horizontalAxisLabel,
+          verticalAxisLabel: testData.verticalAxisLabel,
+          horizontalAxisUnit: testData.horizontalAxisUnit,
+          verticalAxisUnit: testData.verticalAxisUnit,
+          threshold: 6.0,
+          onThresholdValueChanged: (_) {},
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SimpleOscilloscope(
+                key: key,
+                oscilloscopeAxisChartData: data,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(key.currentState!.currentThresholdValue, 6.0);
+      },
+    );
+
+    testWidgets(
+      'dialog Update button reverts to prop threshold without callback',
+      (WidgetTester tester) async {
+        final key = GlobalKey<SimpleOscilloscopeState>();
+        final data = OscilloscopeAxisChartData(
+          dataPoints: testData.dataPoints,
+          horizontalAxisLabel: testData.horizontalAxisLabel,
+          verticalAxisLabel: testData.verticalAxisLabel,
+          horizontalAxisUnit: testData.horizontalAxisUnit,
+          verticalAxisUnit: testData.verticalAxisUnit,
+          threshold: 2.0,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SimpleOscilloscope(
+                key: key,
+                oscilloscopeAxisChartData: data,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        tester.widget<ThresholdSlider>(find.byType(ThresholdSlider)).onDoubleTap?.call();
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextFormField), '4.5');
+        await tester.tap(find.widgetWithText(TextButton, 'Update'));
+        await tester.pumpAndSettle();
+
+        expect(key.currentState!.currentThresholdValue, 2.0);
+      },
+    );
+
+    testWidgets(
+      'dialog Update button with callback commits the value',
+      (WidgetTester tester) async {
+        final key = GlobalKey<SimpleOscilloscopeState>();
+        double? receivedValue;
+        final data = OscilloscopeAxisChartData(
+          dataPoints: testData.dataPoints,
+          horizontalAxisLabel: testData.horizontalAxisLabel,
+          verticalAxisLabel: testData.verticalAxisLabel,
+          horizontalAxisUnit: testData.horizontalAxisUnit,
+          verticalAxisUnit: testData.verticalAxisUnit,
+          threshold: 2.0,
+          onThresholdValueChanged: (value) => receivedValue = value,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SimpleOscilloscope(
+                key: key,
+                oscilloscopeAxisChartData: data,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        tester.widget<ThresholdSlider>(find.byType(ThresholdSlider)).onDoubleTap?.call();
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextFormField), '4.5');
+        await tester.tap(find.widgetWithText(TextButton, 'Update'));
+        await tester.pumpAndSettle();
+
+        expect(key.currentState!.currentThresholdValue, 4.5);
+        expect(receivedValue, 4.5);
+      },
+    );
+
   });
 }

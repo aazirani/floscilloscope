@@ -350,6 +350,22 @@ class AlternativeSimpleOscilloscopeState
     _clampThresholdProgressbarValue();
   }
 
+  void _commitThreshold(double value) {
+    final callback = widget.oscilloscopeAxisChartData.onThresholdValueChanged;
+    if (callback == null) {
+      setState(() {
+        _thresholdValue = widget.oscilloscopeAxisChartData.threshold;
+        _updateThresholdProgressbarValue(_thresholdValue);
+      });
+      return;
+    }
+    setState(() {
+      _thresholdValue = value;
+      _updateThresholdProgressbarValue(value);
+    });
+    callback(double.parse(value.toStringAsFixed(2)));
+  }
+
   double _calculateZoomedMin(
       double currentMin, double currentMax, double zoomPosition) {
     double range = currentMax - currentMin;
@@ -523,21 +539,7 @@ class AlternativeSimpleOscilloscopeState
                     });
                   },
                   onChangeEnd: (dynamic value) {
-                    final callback = widget.oscilloscopeAxisChartData
-                        .onThresholdValueChanged;
-                    if (callback == null) {
-                      setState(() {
-                        _thresholdValue =
-                            widget.oscilloscopeAxisChartData.threshold;
-                        _updateThresholdProgressbarValue(_thresholdValue);
-                      });
-                      return;
-                    }
-                    _thresholdValue = value;
-                    setState(() {
-                      _updateThresholdProgressbarValue(value);
-                    });
-                    callback(double.parse(value.toStringAsFixed(2)));
+                    _commitThreshold(value);
                   },
                 ),
               ],
@@ -598,21 +600,7 @@ class AlternativeSimpleOscilloscopeState
               FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
             ],
             onFieldSubmitted: (value) {
-              final callback = widget.oscilloscopeAxisChartData
-                  .onThresholdValueChanged;
-              if (callback == null) {
-                setState(() {
-                  _thresholdValue =
-                      widget.oscilloscopeAxisChartData.threshold;
-                  _updateThresholdProgressbarValue(_thresholdValue);
-                });
-              } else {
-                _thresholdValue = newValue;
-                setState(() {
-                  _updateThresholdProgressbarValue(newValue);
-                });
-                callback(double.parse(newValue.toStringAsFixed(2)));
-              }
+              _commitThreshold(newValue);
               Navigator.of(context).pop();
             },
           ),
@@ -621,21 +609,7 @@ class AlternativeSimpleOscilloscopeState
             TextButton(
               child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
               onPressed: () {
-                final callback = widget.oscilloscopeAxisChartData
-                    .onThresholdValueChanged;
-                if (callback == null) {
-                  setState(() {
-                    _thresholdValue =
-                        widget.oscilloscopeAxisChartData.threshold;
-                    _updateThresholdProgressbarValue(_thresholdValue);
-                  });
-                } else {
-                  _thresholdValue = newValue;
-                  setState(() {
-                    _updateThresholdProgressbarValue(newValue);
-                  });
-                  callback(double.parse(newValue.toStringAsFixed(2)));
-                }
+                _commitThreshold(newValue);
                 Navigator.of(context).pop();
               },
             ),
