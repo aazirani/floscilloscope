@@ -523,12 +523,21 @@ class AlternativeSimpleOscilloscopeState
                     });
                   },
                   onChangeEnd: (dynamic value) {
+                    final callback = widget.oscilloscopeAxisChartData
+                        .onThresholdValueChanged;
+                    if (callback == null) {
+                      setState(() {
+                        _thresholdValue =
+                            widget.oscilloscopeAxisChartData.threshold;
+                        _updateThresholdProgressbarValue(_thresholdValue);
+                      });
+                      return;
+                    }
                     _thresholdValue = value;
                     setState(() {
                       _updateThresholdProgressbarValue(value);
                     });
-                    widget.oscilloscopeAxisChartData.onThresholdValueChanged
-                        ?.call(double.parse(value.toStringAsFixed(2)));
+                    callback(double.parse(value.toStringAsFixed(2)));
                   },
                 ),
               ],
@@ -589,12 +598,21 @@ class AlternativeSimpleOscilloscopeState
               FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
             ],
             onFieldSubmitted: (value) {
-              setState(() {
+              final callback = widget.oscilloscopeAxisChartData
+                  .onThresholdValueChanged;
+              if (callback == null) {
+                setState(() {
+                  _thresholdValue =
+                      widget.oscilloscopeAxisChartData.threshold;
+                  _updateThresholdProgressbarValue(_thresholdValue);
+                });
+              } else {
                 _thresholdValue = newValue;
-                _updateThresholdProgressbarValue(newValue);
-                widget.oscilloscopeAxisChartData.onThresholdValueChanged
-                    ?.call(double.parse(newValue.toStringAsFixed(2)));
-              });
+                setState(() {
+                  _updateThresholdProgressbarValue(newValue);
+                });
+                callback(double.parse(newValue.toStringAsFixed(2)));
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -603,12 +621,21 @@ class AlternativeSimpleOscilloscopeState
             TextButton(
               child: Text(widget.oscilloscopeAxisChartData.updateButtonLabel),
               onPressed: () {
-                setState(() {
+                final callback = widget.oscilloscopeAxisChartData
+                    .onThresholdValueChanged;
+                if (callback == null) {
+                  setState(() {
+                    _thresholdValue =
+                        widget.oscilloscopeAxisChartData.threshold;
+                    _updateThresholdProgressbarValue(_thresholdValue);
+                  });
+                } else {
                   _thresholdValue = newValue;
-                  _updateThresholdProgressbarValue(newValue);
-                  widget.oscilloscopeAxisChartData.onThresholdValueChanged
-                      ?.call(double.parse(newValue.toStringAsFixed(2)));
-                });
+                  setState(() {
+                    _updateThresholdProgressbarValue(newValue);
+                  });
+                  callback(double.parse(newValue.toStringAsFixed(2)));
+                }
                 Navigator.of(context).pop();
               },
             ),

@@ -144,6 +144,73 @@ void main() {
       expect(find.byType(SimpleOscilloscope), findsOneWidget);
     });
 
+    testWidgets(
+        'threshold slider drag-end without a callback reverts to the prop threshold',
+        (WidgetTester tester) async {
+      final key = GlobalKey<SimpleOscilloscopeState>();
+      final data = OscilloscopeAxisChartData(
+        dataPoints: testData.dataPoints,
+        horizontalAxisLabel: testData.horizontalAxisLabel,
+        verticalAxisLabel: testData.verticalAxisLabel,
+        horizontalAxisUnit: testData.horizontalAxisUnit,
+        verticalAxisUnit: testData.verticalAxisUnit,
+        threshold: 2.0,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SimpleOscilloscope(
+              key: key,
+              oscilloscopeAxisChartData: data,
+            ),
+          ),
+        ),
+      );
+
+      final slider =
+          tester.widget<ThresholdSlider>(find.byType(ThresholdSlider));
+      slider.onChangeEnd(4.5);
+      await tester.pump();
+
+      expect(key.currentState!.currentThresholdValue, 2.0);
+    });
+
+    testWidgets(
+        'threshold slider drag-end with a callback commits the value and invokes the callback',
+        (WidgetTester tester) async {
+      final key = GlobalKey<SimpleOscilloscopeState>();
+      double? receivedValue;
+      final data = OscilloscopeAxisChartData(
+        dataPoints: testData.dataPoints,
+        horizontalAxisLabel: testData.horizontalAxisLabel,
+        verticalAxisLabel: testData.verticalAxisLabel,
+        horizontalAxisUnit: testData.horizontalAxisUnit,
+        verticalAxisUnit: testData.verticalAxisUnit,
+        threshold: 2.0,
+        onThresholdValueChanged: (value) => receivedValue = value,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SimpleOscilloscope(
+              key: key,
+              oscilloscopeAxisChartData: data,
+            ),
+          ),
+        ),
+      );
+
+      final slider =
+          tester.widget<ThresholdSlider>(find.byType(ThresholdSlider));
+      slider.onChangeEnd(4.5);
+      await tester.pump();
+
+      expect(key.currentState!.currentThresholdValue, 4.5);
+      expect(receivedValue, 4.5);
+    });
+
     testWidgets('should handle extra plot lines', (WidgetTester tester) async {
       final dataWithExtraLines = OscilloscopeAxisChartData(
         dataPoints: testData.dataPoints,

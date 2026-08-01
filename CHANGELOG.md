@@ -45,6 +45,11 @@
 
 * Fixed threshold dialog text field displaying negative values incorrectly in RTL locales.
 
+## 1.1.3
+
+* Threshold is now parent-controlled when no `onThresholdValueChanged` callback is supplied. In `SimpleOscilloscope` and `AlternativeSimpleOscilloscope`, finishing a threshold slider drag or submitting the threshold dialog without a callback now reverts the internal threshold to the `threshold` prop instead of silently committing the dragged value and desyncing from the source of truth. Provide `onThresholdValueChanged` to make threshold changes persistent.
+* Exposed `SimpleOscilloscopeState` publicly (matching `AlternativeSimpleOscilloscopeState`) with a `@visibleForTesting currentThresholdValue` getter/setter so the threshold state can be asserted in tests.
+
 ## 1.1.2
 
 * Fixed stale trailing points remaining on the `AlternativeSimpleOscilloscope` chart when a series is replaced with a shorter list. Data updates are now pushed through `ChartSeriesController.updateDataSource`, which also avoids a full `SfCartesianChart` rebuild on data-only changes.
